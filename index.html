@@ -1,0 +1,883 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ArhGo — المنصّة الذكية لتخطيط السفر</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600;700;800;900&family=Playfair+Display:wght@400;500;600;700;800;900&family=Cinzel:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/css/arhgo.css">
+  <script src="assets/js/user-auth.js" defer></script>
+  <script src="assets/js/arhgo.js" defer></script>
+  <script src="assets/js/countries-database.js" defer></script>
+  <script src="assets/js/smart-country-suggestor.js" defer></script>
+  <script src="assets/js/globe-interaction.js" defer></script>
+</head>
+<body class="page-hidden">
+  <nav class="arhgo-nav">
+    <div class="arhgo-logo">ArhGo</div>
+      <ul>
+        <li><a data-nav href="index.html#home" data-translate="nav.home">الرئيسية</a></li>
+      <li><a data-nav href="hotel.html" data-translate="nav.hotels">الفنادق</a></li>
+      <li><a data-nav href="ticket-booking.html" data-translate="nav.flights">حجز الرحلات</a></li>
+      <li><a data-nav href="Restuarnt.html" data-translate="nav.restaurants">مطاعم</a></li>
+      <li><a data-nav href="my-bookings.html">حجوزاتي</a></li>
+      <li><a data-nav href="analytics.html">التحليلات</a></li>
+      <li><a data-nav href="budget-manager.html">إدارة الميزانية</a></li>
+      <li><a data-nav href="price-comparison.html">مقارنة الأسعار</a></li>
+      <li><a data-nav href="smart-alerts.html">التنبيهات</a></li>
+  </ul>
+    <div class="stack" id="authButtons">
+      <a class="btn btn-ghost" href="login.html" data-flight-sound data-translate="nav.login" id="loginBtn">تسجيل الدخول</a>
+      <a class="btn btn-gradient" href="signup.html" data-flight-sound data-translate="nav.signup" id="signupBtn">إنشاء حساب</a>
+    </div>
+    <div class="stack" id="userProfile" style="display: none; align-items: center; gap: var(--spacing-sm);">
+      <span class="user-name" id="userNameDisplay" style="color: var(--neon-cyan); font-weight: 700; font-size: 1rem; white-space: nowrap; text-shadow: 0 0 10px var(--neon-cyan-glow);">المستخدم</span>
+      <button class="btn btn-ghost" onclick="userAuth.logout(); location.reload();" style="padding: 8px 16px; font-size: 0.85rem; white-space: nowrap;">تسجيل الخروج</button>
+    </div>
+</nav>
+
+  <main class="page-shell">
+<section class="hero" id="home">
+      <div class="hero-grid">
+        <div class="hero-main">
+          <h1 data-translate="hero.title">Your Smart Travel Experience Starts Here</h1>
+          <p data-translate="hero.subtitle">منصة ذكية لتخطيط رحلاتك بكل سهولة وأناقة. خطط مخصصة، اقتراحات ذكية، ومشاركة فورية.</p>
+          <div class="hero-highlights">
+            <div class="highlight-chip">
+              <em>✦</em> <span data-translate="hero.highlight1">خطة أولى جاهزة خلال دقيقة واحدة</span>
+            </div>
+            <div class="highlight-chip">
+              <em>⟲</em> <span data-translate="hero.highlight2">مزاج السفر يتغير بلمسة واحدة</span>
+            </div>
+          </div>
+          <div class="hero-actions">
+            <button class="btn btn-gradient" id="hero-cta" data-flight-sound data-translate="hero.cta">ابدأ التخطيط الآن</button>
+            <a class="btn btn-ghost" href="smart-planner.html" data-flight-sound data-translate="hero.ai">مولد خطط ذكي</a>
+            <a class="btn btn-ghost" href="analytics.html" data-flight-sound>لوحة التحليلات</a>
+          </div>
+        </div>
+          <div class="hero-visual">
+           <div class="globe-container">
+             <div class="globe-wrapper">
+               <div class="globe">
+                 <div class="globe-sphere">
+                   <img src="https://upload.wikimedia.org/wikipedia/commons/8/83/Equirectangular_projection_SW.jpg" alt="World Map" class="world-map-texture" />
+                 </div>
+                 <div class="globe-shine"></div>
+               </div>
+               <div class="globe-rings">
+                 <div class="ring ring-1"></div>
+                 <div class="ring ring-2"></div>
+                 <div class="ring ring-3"></div>
+               </div>
+             </div>
+           </div>
+         </div>
+       </div>
+     </section>
+
+    <section class="section" id="planner">
+      <div class="section-header">
+        <h2 class="section-title" data-translate="sections.planner.title">صمّم رحلتك خلال دقيقة</h2>
+        <p class="section-subtitle" data-translate="sections.planner.subtitle">املأ التفاصيل، شاهد التكلفة التقديرية، احفظ خطتك أو شاركها، ثم انتقل إلى الملخص أو المولد الذكي.</p>
+      </div>
+      <div class="split" style="position: relative; z-index: 10;">
+        <form class="arhgo-form" id="trip-form" style="position: relative; z-index: 10;">
+    <div class="field full-width">
+            <label for="trip-name">اسمك</label>
+            <input class="arhgo-input" type="text" id="trip-name" placeholder="مثال: علي محمد">
+    </div>
+    
+    <div class="field">
+            <label for="trip-weather">الجو المفضل</label>
+            <select class="arhgo-select" id="trip-weather">
+              <option value="">اختر الجو المفضل...</option>
+              <option value="دافئ">دافئ</option>
+              <option value="معتدل">معتدل</option>
+              <option value="بارد">بارد</option>
+              <option value="حار">حار</option>
+            </select>
+    </div>
+    
+    <div class="field">
+            <label for="trip-scenery">المنظر المفضل</label>
+            <select class="arhgo-select" id="trip-scenery">
+              <option value="">اختر المنظر المفضل...</option>
+              <option value="مدينة">مدينة</option>
+              <option value="بحر">بحر</option>
+              <option value="طبيعة">طبيعة</option>
+              <option value="جبال">جبال</option>
+              <option value="صحراء">صحراء</option>
+              <option value="تاريخ">تاريخ</option>
+            </select>
+    </div>
+    
+    <div class="field">
+            <label for="trip-type">نوع الرحلة</label>
+            <select class="arhgo-select" id="trip-type">
+              <option value="">اختر نوع الرحلة...</option>
+              <option value="ثقافي">ثقافي</option>
+              <option value="مغامرة">مغامرة</option>
+              <option value="رومانسي">رومانسي</option>
+              <option value="تسوق">تسوق</option>
+              <option value="طعام">طعام</option>
+              <option value="تاريخ">تاريخ</option>
+              <option value="ترفيه">ترفيه</option>
+              <option value="عوائل">عوائل</option>
+              <option value="طلاب">طلاب</option>
+              <option value="بحر">بحر</option>
+              <option value="طبيعة">طبيعة</option>
+            </select>
+    </div>
+    
+    <div class="field">
+            <label for="trip-budget">الميزانية</label>
+            <select class="arhgo-select" id="trip-budget">
+              <option value="">اختر الميزانية...</option>
+              <option value="low">منخفضة (اقتصادية)</option>
+              <option value="medium">متوسطة</option>
+              <option value="high">فاخرة</option>
+            </select>
+    </div>
+    
+    <div class="field full-width">
+            <label for="trip-interests">اهتماماتك الرئيسية</label>
+            <select class="arhgo-select" id="trip-interests" multiple>
+              <option value="ثقافة">ثقافة</option>
+              <option value="تاريخ">تاريخ</option>
+              <option value="طعام">طعام</option>
+              <option value="طبيعة">طبيعة</option>
+              <option value="بحر">بحر</option>
+              <option value="تسوق">تسوق</option>
+              <option value="مغامرة">مغامرة</option>
+              <option value="فن">فن</option>
+              <option value="رياضة">رياضة</option>
+              <option value="استرخاء">استرخاء</option>
+            </select>
+            <small class="field-hint">اضغط Ctrl/Cmd لاختيار أكثر من واحد</small>
+    </div>
+    
+    <div class="field">
+            <label for="trip-people">عدد الأشخاص</label>
+            <input class="arhgo-input" type="number" id="trip-people" min="1" placeholder="مثال: 2">
+    </div>
+    
+    <div class="field">
+            <label for="trip-days">عدد الأيام</label>
+            <input class="arhgo-input" type="number" id="trip-days" min="1" placeholder="مثال: 5">
+    </div>
+    
+    <div class="field suggested-country-field full-width">
+            <label>الدولة المقترحة (ذكية)</label>
+            <div id="suggested-country">
+              <span id="suggested-country-name">املأ الحقول أعلاه للحصول على اقتراح ذكي</span>
+            </div>
+            <button type="button" class="btn btn-ghost" id="use-suggested-btn" onclick="useSuggestedCountry()" style="display: none;">
+              استخدم هذا الاقتراح
+            </button>
+    </div>
+    
+    <div class="field">
+            <label for="trip-country">الوجهة (اختياري)</label>
+            <select class="arhgo-select" id="trip-country">
+              <option value="" data-translate="form.selectDestination">أو اختر يدوياً...</option>
+              <option value="السعودية">السعودية</option>
+              <option value="الإمارات">الإمارات</option>
+              <option value="الكويت">الكويت</option>
+              <option value="قطر">قطر</option>
+              <option value="البحرين">البحرين</option>
+              <option value="عُمان">عُمان</option>
+              <option value="اليمن">اليمن</option>
+              <option value="العراق">العراق</option>
+              <option value="سوريا">سوريا</option>
+              <option value="الأردن">الأردن</option>
+              <option value="لبنان">لبنان</option>
+              <option value="فلسطين">فلسطين</option>
+      </select>
+    </div>
+    
+    <div class="field">
+            <label for="trip-email">البريد الإلكتروني (اختياري)</label>
+            <input class="arhgo-input" type="email" id="trip-email" placeholder="you@email.com">
+    </div>
+    
+    <div class="field full-width">
+            <label for="trip-notes">ملاحظات إضافية (اختياري)</label>
+            <textarea class="arhgo-textarea" id="trip-notes" placeholder="أي تفاصيل إضافية..."></textarea>
+    </div>
+    
+          <div class="form-actions full-width">
+            <button type="button" class="btn btn-gradient" id="create-trip-btn" data-flight-sound>أنشئ الخطة</button>
+            <button type="button" class="btn btn-ghost" id="smart-planner-btn" data-flight-sound>مولد خطط ذكي</button>
+            <button type="button" class="btn btn-ghost" id="save-plan-btn">حفظ خطتي</button>
+    </div>
+        </form>
+
+        <div class="glass-card glow-card" style="position: relative; z-index: 10;">
+          <h3 data-translate="summary.title">ملخص سريع</h3>
+          <p data-translate="summary.desc">نحسب التكلفة التقديرية فورًا ونعرض رابط مشاركة قصير عند الحفظ.</p>
+          <div class="stats-grid">
+            <div class="stat-chip">
+              <span id="stat-days">0</span>
+              <span data-translate="summary.days">يوم الرحلة</span>
+            </div>
+            <div class="stat-chip">
+              <span id="stat-budget">$0</span>
+              <span data-translate="summary.cost">التكلفة التقديرية</span>
+            </div>
+            <div class="stat-chip">
+              <span id="stat-country">—</span>
+              <span data-translate="summary.destination">الوجهة</span>
+            </div>
+          </div>
+          <hr style="border-color:rgba(255,255,255,0.08);margin:24px 0;">
+          <div>
+            <p class="plan-meta" data-translate="summary.shareLink">رابط المشاركة:</p>
+            <p id="share-link" class="badge badge-info" data-translate="summary.shareLinkPlaceholder">سيظهر بعد الحفظ</p>
+            <p class="plan-meta" id="plan-status" data-translate="summary.ready">جاهز للإنشاء ✨</p>
+          </div>
+        </div>
+  </div>
+</section>
+
+    <section class="section split" id="destinations">
+      <div class="glass-card">
+        <h3 data-translate="sections.destinations.title">أفضل الوجهات الآن</h3>
+        <div id="destinations-tabs" class="stack"></div>
+        <div id="destinations-content" class="timeline" style="margin-top:18px;"></div>
+      </div>
+      <div class="map-preview">
+        <iframe title="ArhGo world map" src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d8582251.092659855!2d16.2795226!3d46.32532945!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x12b45bbb4694c1f1%3A0x8d26ab9dd98ec605!2sMediterranean%20Sea!5e0!3m2!1sen!2siq!4v1731812222000!5m2!1sen!2siq" loading="lazy" style="will-change: auto;"></iframe>
+  </div>
+</section>
+
+  </main>
+
+<footer>
+    <p data-translate="footer.copyright">ArhGo © 2025 — جميع الحقوق محفوظة</p>
+    <p data-translate="footer.connected">واجهات متصلة: <a href="hotel.html" data-flight-sound data-translate="footer.hotels">فنادق</a> • <a href="flights.html" data-flight-sound data-translate="footer.flights">رحلات جوية</a> • <a href="Restuarnt.html" data-flight-sound data-translate="footer.restaurants">مطاعم</a></p>
+</footer>
+
+  <div id="toast" style="position:fixed;bottom:30px;right:30px;padding:16px 24px;border-radius:18px;background:linear-gradient(135deg, rgba(30,58,95,0.95), rgba(26,46,74,0.95));color:#fff;box-shadow:0 20px 60px rgba(192,192,192,0.3);opacity:0;transform:translateY(20px);transition:.4s;z-index:9999;border:2px solid rgba(192,192,192,0.4);"></div>
+
+<script>
+    // لإضافة صورة خلفية للـ hero، ضع مسار الصورة هنا:
+    // انسخ الصورة إلى مجلد assets/images/ ثم استخدم المسار التالي:
+    const heroBackgroundImage = 'assets/images/photo_2025-11-25_18-20-52.jpg'; // إذا كانت الصورة في مكان آخر، غيّر المسار هنا
+    
+    const heroImages = [
+      'https://images.unsplash.com/photo-1502602898657-3e91760cbb34',
+      'https://images.unsplash.com/photo-1467269204594-9661b134dd2b',
+      'https://images.unsplash.com/photo-1505764706515-aa95265c5abc',
+      'https://images.unsplash.com/photo-1491553895911-0055eca6402d'
+    ];
+    let heroIndex = 0;
+    const heroEl = document.querySelector('.hero');
+    
+    // إذا كانت هناك صورة محددة، استخدمها
+    if (heroBackgroundImage) {
+      // إنشاء div منفصل للصورة الخلفية مع تأثيرات
+      const bgDiv = document.createElement('div');
+      bgDiv.className = 'hero-bg-image';
+      bgDiv.style.backgroundImage = `url('${heroBackgroundImage}')`;
+      heroEl.insertBefore(bgDiv, heroEl.firstChild);
+    } else {
+      // استخدام صورة واحدة فقط (بدون cycling)
+      if (heroImages.length > 0) {
+        heroEl.style.backgroundImage = `url('${heroImages[0]}')`;
+        heroEl.style.backgroundSize = 'cover';
+        heroEl.style.backgroundPosition = 'center';
+      }
+    }
+
+    document.getElementById('hero-cta').addEventListener('click', () => {
+      document.getElementById('planner').scrollIntoView({ behavior: 'smooth' });
+    });
+
+    const createBtn = document.getElementById('create-trip-btn');
+    const smartPlannerBtn = document.getElementById('smart-planner-btn');
+    const saveBtn = document.getElementById('save-plan-btn');
+    const inputs = {
+      name: document.getElementById('trip-name'),
+      email: document.getElementById('trip-email'),
+      country: document.getElementById('trip-country'),
+      days: document.getElementById('trip-days'),
+      tripType: document.getElementById('trip-type'),
+      interests: document.getElementById('trip-interests'),
+      budget: document.getElementById('trip-budget'),
+      weather: document.getElementById('trip-weather'),
+      scenery: document.getElementById('trip-scenery'),
+      people: document.getElementById('trip-people'),
+      notes: document.getElementById('trip-notes')
+    };
+    
+    // حفظ الدولة المختارة في localStorage عند تغييرها
+    if (inputs.country) {
+      inputs.country.addEventListener('change', (e) => {
+        if (e.target.value) {
+          localStorage.setItem('selectedCountry', e.target.value);
+        }
+      });
+    }
+    
+    let suggestedCountry = null;
+    
+    // تحديث اقتراح الدولة تلقائياً
+    function updateCountrySuggestion() {
+      const weather = inputs.weather.value;
+      const scenery = inputs.scenery.value;
+      const tripType = inputs.tripType.value;
+      const budget = inputs.budget.value;
+      const numPeople = parseInt(inputs.people.value) || 1;
+      
+      const interestsSelect = inputs.interests;
+      const selectedInterests = Array.from(interestsSelect.selectedOptions).map(opt => opt.value);
+      
+      if (weather && scenery && tripType && budget) {
+        const suggestions = suggestCountry(weather, scenery, tripType, selectedInterests, budget, numPeople);
+        if (suggestions.length > 0) {
+          suggestedCountry = suggestions[0].country;
+          const suggestedEl = document.getElementById('suggested-country-name');
+          const useBtn = document.getElementById('use-suggested-btn');
+          
+          suggestedEl.innerHTML = `🎯 ${suggestedCountry} <span style="font-size: 0.9rem; color: #B8D4F0;">(مطابقة ${suggestions[0].match}%)</span>`;
+          useBtn.style.display = 'block';
+        }
+      } else {
+        document.getElementById('suggested-country-name').textContent = 'املأ الحقول أعلاه للحصول على اقتراح ذكي';
+        document.getElementById('use-suggested-btn').style.display = 'none';
+      }
+    }
+    
+    // استخدام الدولة المقترحة (دالة عامة)
+    window.useSuggestedCountry = function() {
+      if (suggestedCountry) {
+        inputs.country.value = suggestedCountry;
+        localStorage.setItem('selectedCountry', suggestedCountry);
+        showToast(`تم اختيار ${suggestedCountry} كوجهة رحلتك ✨`);
+      }
+    };
+    
+    // تغيير الخلفية حسب الدولة - تم إزالة الصورة
+    function changeBackgroundForCountry(country) {
+      // لا شيء - تم إزالة فكرة الصورة
+    }
+    
+    // استماع لتغييرات الحقول (debounced)
+    let suggestionTimeout;
+    const debouncedUpdate = () => {
+      clearTimeout(suggestionTimeout);
+      suggestionTimeout = setTimeout(updateCountrySuggestion, 300);
+    };
+    
+    ['weather', 'scenery', 'tripType', 'budget', 'interests', 'people'].forEach(field => {
+      if (inputs[field]) {
+        inputs[field].addEventListener('change', debouncedUpdate);
+      }
+    });
+    
+    // حفظ الدولة عند اختيارها يدوياً
+    inputs.country.addEventListener('change', function() {
+      const selectedCountry = this.value;
+      if (selectedCountry) {
+        localStorage.setItem('selectedCountry', selectedCountry);
+      }
+    });
+    
+    // تحديث أولي
+    updateCountrySuggestion();
+
+    const stats = {
+      days: document.getElementById('stat-days'),
+      budget: document.getElementById('stat-budget'),
+      country: document.getElementById('stat-country'),
+      link: document.getElementById('share-link'),
+      status: document.getElementById('plan-status')
+    };
+
+    const toast = document.getElementById('toast');
+    const showToast = (message) => {
+      toast.textContent = message;
+      toast.style.opacity = '1';
+      toast.style.transform = 'translateY(0)';
+      setTimeout(() => {
+        toast.style.opacity = '0';
+        toast.style.transform = 'translateY(20px)';
+      }, 3000);
+    };
+
+
+    const buildTripPayload = () => {
+      const days = parseInt(inputs.days.value, 10) || 1;
+      const tripType = inputs.tripType.value || 'متوسطة';
+      let country = inputs.country.value;
+      
+      // استخدام الدولة المقترحة إذا لم يتم اختيار واحدة
+      if (!country && suggestedCountry) {
+        country = suggestedCountry;
+      }
+      country = country || 'غير محدد';
+      
+      const interestsSelect = inputs.interests;
+      const selectedInterests = Array.from(interestsSelect.selectedOptions).map(opt => opt.value).join('، ');
+      
+      const payload = {
+        name: inputs.name.value || 'مستخدم',
+        email: inputs.email.value || '',
+        country,
+        days,
+        tripType,
+        interests: selectedInterests || '',
+        budget: inputs.budget.value || 'متوسطة',
+        weather: inputs.weather.value || '',
+        scenery: inputs.scenery.value || '',
+        people: parseInt(inputs.people.value) || 1,
+        notes: inputs.notes.value || ''
+      };
+      payload.estimatedCost = calculateCost(days, tripType, payload.budget);
+      return payload;
+    };
+    
+    const calculateCost = (days, type, budget) => {
+      const budgetMultiplier = budget === 'low' ? 0.5 : budget === 'high' ? 1.8 : 1;
+      const normalized = (type || '').toLowerCase();
+      let perDay = 120;
+      if (normalized.includes('اقتصادية') || normalized.includes('budget')) perDay = 60;
+      if (normalized.includes('فاخرة') || normalized.includes('lux')) perDay = 220;
+      return Math.max(1, days) * perDay * budgetMultiplier;
+    };
+
+    const updateStats = (payload, shortLink = 'سيظهر بعد الحفظ') => {
+      stats.days.textContent = payload.days;
+      stats.country.textContent = payload.country;
+      stats.budget.textContent = `$${payload.estimatedCost}`;
+      stats.link.textContent = shortLink;
+      stats.status.textContent = `جاهز — ${payload.tripType}`;
+    };
+
+  createBtn.addEventListener('click', () => {
+      const payload = buildTripPayload();
+      
+      // استخدام الدولة المقترحة إذا لم يتم اختيار واحدة
+      if (!payload.country || payload.country === 'غير محدد') {
+        if (suggestedCountry) {
+          payload.country = suggestedCountry;
+          inputs.country.value = suggestedCountry;
+        } else {
+          alert('يرجى اختيار وجهة أو ملء الحقول للحصول على اقتراح ذكي');
+          return;
+        }
+      }
+      
+      updateStats(payload);
+      
+      // الانتقال مباشرة
+      const url = `trip-summary.html?days=${payload.days}&type=${encodeURIComponent(payload.tripType)}&country=${encodeURIComponent(payload.country)}&cost=${payload.estimatedCost}`;
+      if (window.ArhGo?.delayedNavigate) {
+        window.ArhGo.delayedNavigate(url);
+      } else {
+        window.location.href = url;
+      }
+    });
+    
+
+    smartPlannerBtn.addEventListener('click', () => {
+      const payload = buildTripPayload();
+      
+      // استخدام الدولة المقترحة إذا لم يتم اختيار واحدة
+      if (!payload.country || payload.country === 'غير محدد') {
+        if (suggestedCountry) {
+          payload.country = suggestedCountry;
+          inputs.country.value = suggestedCountry;
+        } else {
+          alert('يرجى اختيار وجهة أو ملء الحقول للحصول على اقتراح ذكي');
+          return;
+        }
+      }
+      
+      // حفظ الدولة المختارة في localStorage
+      if (payload.country) {
+        localStorage.setItem('selectedCountry', payload.country);
+      }
+      
+      const smartUrl = `smart-planner.html?country=${encodeURIComponent(payload.country)}&days=${payload.days}&interests=${encodeURIComponent(payload.interests)}&budget=${encodeURIComponent(payload.budget)}&notes=${encodeURIComponent(payload.notes)}`;
+      if (window.ArhGo?.delayedNavigate) {
+        window.ArhGo.delayedNavigate(smartUrl);
+      } else {
+        window.location.href = smartUrl;
+      }
+    });
+
+
+    saveBtn.addEventListener('click', async () => {
+      const session_token = localStorage.getItem('session_token');
+      if (!session_token) {
+        showToast('⚠️ يرجى تسجيل الدخول أولاً لحفظ الخطة في حسابك');
+        setTimeout(() => {
+          window.location.href = 'login.html';
+        }, 2000);
+        return;
+      }
+
+      const payload = buildTripPayload();
+      
+      // الحصول على country_id من اسم الدولة
+      let country_id = 0;
+      try {
+        const baseUrl = window.location.protocol === 'file:' ? 'http://localhost/ArhGo-trip-planner/' : './';
+        const countriesResponse = await fetch(baseUrl + 'api/get_countries.php');
+        const countriesData = await countriesResponse.json();
+        
+        if (countriesData.success && countriesData.data) {
+          const country = countriesData.data.find(c => 
+            c.country_name_ar === payload.country || 
+            c.country_name_en === payload.country
+          );
+          if (country) {
+            country_id = country.id;
+          }
+        }
+      } catch (error) {
+        console.error('خطأ في الحصول على country_id:', error);
+      }
+
+      // إعداد بيانات الخطة للإرسال
+      const planData = {
+        plan_name: `رحلة إلى ${payload.country}`,
+        country_id: country_id,
+        city_id: null, // يمكن إضافته لاحقاً
+        weather_preference: payload.weather || '',
+        view_preference: payload.scenery || '',
+        trip_type: payload.tripType || '',
+        budget: payload.budget || 'متوسطة',
+        start_date: null, // يمكن إضافته لاحقاً
+        end_date: null, // يمكن إضافته لاحقاً
+        duration_days: payload.days || 1,
+        estimated_cost: payload.estimatedCost || 0,
+        interests: payload.interests ? payload.interests.split('، ') : [],
+        activities: [],
+        selected_hotels: [],
+        selected_restaurants: [],
+        plan_data: payload
+      };
+
+      // إظهار رسالة التحميل
+      const originalText = saveBtn.textContent;
+      saveBtn.disabled = true;
+      saveBtn.textContent = 'جاري الحفظ...';
+
+      try {
+        const baseUrl = window.location.protocol === 'file:' ? 'http://localhost/ArhGo-trip-planner/' : './';
+        
+        const requestData = {
+          session_token: session_token,
+          plan_data: planData
+        };
+        
+        console.log('📤 إرسال بيانات الخطة:', requestData);
+        console.log('🌐 URL:', baseUrl + 'api/save_travel_plan.php');
+        
+        const response = await fetch(baseUrl + 'api/save_travel_plan.php', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(requestData)
+        });
+
+        console.log('📥 حالة الاستجابة:', response.status, response.statusText);
+        
+        const result = await response.json();
+        console.log('📦 النتيجة:', result);
+
+        if (result.success) {
+          console.log('✅ تم حفظ الخطة بنجاح! Plan ID:', result.plan_id);
+          const shortCode = result.share_link || Math.random().toString(36).substring(2, 8).toUpperCase();
+          const link = `https://arhgo.travel/r/${shortCode}`;
+          updateStats(payload, link);
+          showToast('✅ تم حفظ الخطة في حسابك مع رابط قصير ✨');
+        } else {
+          console.error('❌ فشل حفظ الخطة:', result);
+          throw new Error(result.error || 'فشل حفظ الخطة');
+        }
+      } catch (error) {
+        console.error('❌ خطأ في حفظ الخطة:', error);
+        console.error('تفاصيل الخطأ:', {
+          message: error.message,
+          stack: error.stack,
+          name: error.name
+        });
+        
+        let errorMessage = 'حدث خطأ أثناء حفظ الخطة';
+        if (error.message) {
+          errorMessage = error.message;
+        } else if (error instanceof TypeError && error.message.includes('fetch')) {
+          errorMessage = 'فشل الاتصال بالخادم. تأكد من أنك تستخدم http://localhost';
+        }
+        
+        showToast('❌ ' + errorMessage + '\n\nافتح Console (F12) لمعرفة التفاصيل');
+      } finally {
+        saveBtn.disabled = false;
+        saveBtn.textContent = originalText;
+      }
+    });
+
+    const destinations = [
+      { name: 'السعودية', tips: ['الكعبة المشرفة', 'جبل النور', 'وادي الرمة', 'مدائن صالح'] },
+      { name: 'الإمارات', tips: ['برج خليفة', 'دبي مول', 'جزيرة النخيل', 'مسجد الشيخ زايد'] },
+      { name: 'الكويت', tips: ['أبراج الكويت', 'المتحف الوطني', 'جزيرة فيلكا', 'سوق المباركية'] },
+      { name: 'قطر', tips: ['متحف الفن الإسلامي', 'اللؤلؤة قطر', 'سوق واقف', 'كورنيش الدوحة'] },
+      { name: 'البحرين', tips: ['شجرة الحياة', 'قلعة البحرين', 'سوق المنامة', 'جسر الملك فهد'] },
+      { name: 'عُمان', tips: ['قلعة نزوى', 'وادي شاب', 'جبل شمس', 'سوق مطرح'] },
+      { name: 'اليمن', tips: ['صنعاء القديمة', 'جزيرة سقطرى', 'شبام حضرموت', 'جبل صبر'] },
+      { name: 'العراق', tips: ['بابل الأثرية', 'المسجد الكاظمي', 'أهوار الجنوب', 'زقورة أور'] },
+      { name: 'سوريا', tips: ['قلعة حلب', 'تدمر الأثرية', 'المسجد الأموي', 'بصرى الشام'] },
+      { name: 'الأردن', tips: ['البتراء', 'وادي رم', 'البحر الميت', 'قلعة عمان'] },
+      { name: 'لبنان', tips: ['جونيه', 'بيت الدين', 'غابة الأرز', 'صيدا القديمة'] },
+      { name: 'فلسطين', tips: ['المسجد الأقصى', 'كنيسة المهد', 'البحر الميت', 'جبل الزيتون'] }
+    ];
+
+    const tabs = document.getElementById('destinations-tabs');
+    const content = document.getElementById('destinations-content');
+
+    const renderDestination = (index) => {
+      const dest = destinations[index];
+      content.innerHTML = dest.tips.map(t => `<div class="timeline-step" translate="yes">${t}</div>`).join('');
+      
+    };
+
+    destinations.forEach((dest, index) => {
+      const btn = document.createElement('button');
+      btn.className = 'btn btn-ghost';
+      btn.setAttribute('translate', 'yes');
+      btn.textContent = dest.name;
+      btn.addEventListener('click', () => renderDestination(index));
+      tabs.appendChild(btn);
+    });
+    renderDestination(0);
+
+    fetch('http://localhost:3033/flights')
+  .then(res => res.json())
+  .then(data => {
+        if (!Array.isArray(data) || !data.length) return;
+        showToast('تم تفعيل آخر تحديث لأسعار الرحلات ✈️');
+      })
+      .catch(() => {});
+
+    // نظام التوصيات الذكي
+    function generateRecommendations() {
+      const plans = [];
+      const recommendationsGrid = document.getElementById('recommendationsGrid');
+      
+      if (!recommendationsGrid) return;
+      
+      // تحليل الاهتمامات من الخطط السابقة
+      const interests = {};
+      const destinations = {};
+      const budgets = [];
+      
+      plans.forEach(plan => {
+        if (plan.interests) {
+          plan.interests.split(',').forEach(i => {
+            const interest = i.trim();
+            interests[interest] = (interests[interest] || 0) + 1;
+          });
+        }
+        destinations[plan.country] = (destinations[plan.country] || 0) + 1;
+        if (plan.estimatedCost) budgets.push(plan.estimatedCost);
+      });
+      
+      const topInterests = Object.entries(interests).sort((a, b) => b[1] - a[1]).slice(0, 3).map(e => e[0]);
+      const avgBudget = budgets.length > 0 ? budgets.reduce((a, b) => a + b, 0) / budgets.length : 500;
+      
+      // توليد توصيات مخصصة
+      const recommendations = [
+        {
+          title: 'وجهات مشابهة لاهتماماتك',
+          description: `بناءً على اهتماماتك (${topInterests.join('، ')})، نوصي بهذه الوجهات`,
+          items: ['اليابان', 'إيطاليا', 'إسبانيا'],
+          icon: '🌍',
+          color: '#C9B27A'
+        },
+        {
+          title: 'عروض تناسب ميزانيتك',
+          description: `عروض خاصة بأسعار تبدأ من $${Math.round(avgBudget * 0.8)}`,
+          items: ['تايلاند', 'المغرب', 'تركيا'],
+          icon: '💰',
+          color: '#10B981'
+        },
+        {
+          title: 'وجهات جديدة لاكتشافها',
+          description: 'وجهات شائعة قد تهمك بناءً على اتجاهات السفر',
+          items: ['أيسلندا', 'نيوزيلندا', 'كرواتيا'],
+          icon: '✨',
+          color: '#8EA2B6'
+        }
+      ];
+      
+      recommendationsGrid.innerHTML = recommendations.map(rec => `
+        <article class="glass-card floating-card">
+          <div style="font-size: 3rem; margin-bottom: 16px;">${rec.icon}</div>
+          <h3 style="color: #0A1C2E; margin-bottom: 12px;">${rec.title}</h3>
+          <p style="color: #B8D4F0; margin-bottom: 20px; line-height: 1.6;">${rec.description}</p>
+          <div style="display: flex; flex-wrap: wrap; gap: 8px;">
+            ${rec.items.map(item => `
+              <span class="badge badge-info" style="background: ${rec.color}; color: #fff;">
+                ${item}
+              </span>
+            `).join('')}
+          </div>
+          <button class="btn btn-gradient" style="width: 100%; margin-top: 20px;" onclick="exploreDestination('${rec.items[0]}')">
+            استكشف ${rec.items[0]}
+          </button>
+        </article>
+      `).join('');
+    }
+    
+    function exploreDestination(destination) {
+      document.getElementById('trip-country').value = destination;
+      document.getElementById('planner').scrollIntoView({ behavior: 'smooth' });
+    }
+    
+</script>
+  <!-- زر ترجمة متعدد اللغات -->
+  <div id="google_translate_element" style="position: fixed; top: 700px; left: 20px; z-index: 9999; min-width: 110px; min-height: 55px;"></div>
+
+  <script type="text/javascript">
+    // تعريف الدالة قبل تحميل السكريبت
+    window.googleTranslateElementInit = function() {
+      try {
+        if (typeof google !== 'undefined' && google.translate && google.translate.TranslateElement) {
+          new google.translate.TranslateElement({
+            pageLanguage: 'ar',
+            includedLanguages: 'af,sq,am,ar,hy,az,eu,be,bn,bg,ca,ceb,ny,zh-CN,zh-TW,hr,cs,da,nl,en,eo,et,tl,fi,fr,gl,ka,de,el,gu,ht,ha,haw,iw,hi,hmn,hu,is,ig,id,ga,it,ja,jw,kn,kk,km,ko,ku,ky,lo,la,lv,lt,lb,mk,mg,ms,ml,mt,mi,mr,mn,my,né,no,fa,pl,pt,pa,ro,ru,sm,gd,sr,st,si,sk,sl,so,es,su,sw,sv,tg,ta,te,th,tr,uk,ur,uz,vi,cy,xh,yi,yo,zu',
+            layout: google.translate.TranslateElement.InlineLayout.SIMPLE
+          }, 'google_translate_element');
+        }
+      } catch(e) {
+        console.error('خطأ في تحميل Google Translate:', e);
+      }
+    };
+    
+    // تحميل سكريبت الترجمة بعد تحميل الصفحة
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', loadTranslateScript);
+    } else {
+      loadTranslateScript();
+    }
+    
+    function loadTranslateScript() {
+      // التحقق من عدم تحميل السكريبت مسبقاً
+      if (document.querySelector('script[src*="translate.google.com"]')) {
+        return;
+      }
+      
+      const script = document.createElement('script');
+      script.type = 'text/javascript';
+      script.src = 'https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit';
+      script.async = true;
+      script.onerror = function() {
+        console.error('فشل تحميل سكريبت Google Translate');
+      };
+      document.head.appendChild(script);
+    }
+  </script>
+  <script>
+    // التحقق من حالة تسجيل الدخول وعرضها
+    function updateAuthUI() {
+      // التحقق من localStorage مباشرة أولاً
+      const currentUser = localStorage.getItem('arhgo_current_user');
+      const loggedIn = localStorage.getItem('loggedIn');
+      
+      const authButtons = document.getElementById('authButtons');
+      const userProfile = document.getElementById('userProfile');
+      const userNameDisplay = document.getElementById('userNameDisplay');
+      
+      // إذا كان هناك مستخدم مسجل دخول في localStorage
+      if (currentUser || loggedIn) {
+        // محاولة استخدام userAuth إذا كان متاحاً
+        if (typeof userAuth !== 'undefined') {
+          try {
+            const isLoggedIn = userAuth.isLoggedIn();
+            if (isLoggedIn) {
+              const user = userAuth.getCurrentUser();
+              if (user) {
+                if (authButtons) authButtons.style.display = 'none';
+                if (userProfile) {
+                  userProfile.style.display = 'flex';
+                  if (userNameDisplay) {
+                    userNameDisplay.textContent = `👤 ${user.fullname || user.username || currentUser || loggedIn}`;
+                  }
+                }
+                return;
+              }
+            }
+          } catch (error) {
+            console.error('Error with userAuth:', error);
+          }
+        }
+        
+        // إذا لم يكن userAuth متاحاً، استخدام البيانات من localStorage مباشرة
+        if (authButtons) authButtons.style.display = 'none';
+        if (userProfile) {
+          userProfile.style.display = 'flex';
+          if (userNameDisplay) {
+            // محاولة الحصول على اسم المستخدم من localStorage
+            const allUsers = JSON.parse(localStorage.getItem('arhgo_users') || '[]');
+            const user = allUsers.find(u => u.username === (currentUser || loggedIn));
+            const displayName = user ? (user.fullname || user.username) : (currentUser || loggedIn);
+            userNameDisplay.textContent = `👤 ${displayName}`;
+          }
+        }
+      } else {
+        // لا يوجد مستخدم مسجل دخول
+        if (authButtons) authButtons.style.display = 'flex';
+        if (userProfile) userProfile.style.display = 'none';
+      }
+    }
+
+    // تحديث فوري عند تحميل الصفحة
+    (function initAuthUI() {
+      // تحديث فوري
+      updateAuthUI();
+      
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', () => {
+          updateAuthUI();
+          // تحديث مرة واحدة بعد 500ms
+          setTimeout(() => {
+            updateAuthUI();
+          }, 500);
+        });
+      } else {
+        // تحديث مرة واحدة بعد 500ms
+        setTimeout(() => {
+          updateAuthUI();
+        }, 500);
+      }
+    })();
+    
+    // تحديث عند تغيير localStorage (من نافذة أخرى)
+    window.addEventListener('storage', () => {
+      setTimeout(updateAuthUI, 50);
+    });
+    
+    // تحديث عند التركيز على النافذة
+    window.addEventListener('focus', updateAuthUI);
+    
+    // تحديث عند تحميل الصفحة من cache
+    window.addEventListener('pageshow', (event) => {
+      if (event.persisted) {
+        updateAuthUI();
+      }
+    });
+    
+    // تحديث عند الانتقال من صفحة أخرى
+    if (performance.navigation.type === 1) {
+      setTimeout(updateAuthUI, 100);
+    }
+  </script>
+</body>
+</html>

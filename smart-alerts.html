@@ -1,0 +1,590 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ArhGo | تنبيهات ذكية</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/css/arhgo.css">
+  <script src="assets/js/arhgo.js" defer></script>
+  <style>
+    body {
+      background: var(--bg-primary);
+      padding-top: 80px;
+    }
+    
+    .alerts-container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: var(--spacing-xl) var(--spacing-lg);
+    }
+    
+    .alerts-header {
+      text-align: center;
+      margin-bottom: var(--spacing-xl);
+      color: var(--text-primary);
+    }
+    
+    .alerts-header h1 {
+      font-size: 2.5rem;
+      margin-bottom: var(--spacing-md);
+      font-weight: 700;
+      color: var(--text-primary);
+      font-family: 'Cairo', sans-serif;
+    }
+    
+    .country-selector {
+      background: linear-gradient(135deg, rgba(20, 27, 45, 0.8) 0%, rgba(15, 22, 36, 0.9) 100%);
+      backdrop-filter: blur(30px) saturate(200%);
+      -webkit-backdrop-filter: blur(30px) saturate(200%);
+      border-radius: var(--radius-lg);
+      padding: var(--spacing-md);
+      border: 1px solid rgba(0, 229, 255, 0.2);
+      box-shadow: 
+        0 20px 60px rgba(0, 0, 0, 0.4),
+        0 0 0 1px rgba(0, 229, 255, 0.1),
+        inset 0 1px 1px rgba(255, 255, 255, 0.1);
+      margin-bottom: var(--spacing-lg);
+    }
+    
+    .country-selector label {
+      display: block;
+      color: var(--text-primary);
+      font-size: 0.95rem;
+      font-weight: 600;
+      margin-bottom: var(--spacing-sm);
+      font-family: 'Cairo', sans-serif;
+    }
+    
+    .country-selector select {
+      width: 100%;
+      padding: 12px 16px;
+      background: var(--glass-bg);
+      border: 1px solid var(--glass-border);
+      border-radius: var(--radius-md);
+      color: var(--text-primary);
+      font-size: 0.9rem;
+      font-family: 'Cairo', sans-serif;
+    }
+    
+    .country-selector select:focus {
+      outline: 1px solid rgba(0, 229, 255, 0.4);
+      outline-offset: -1px;
+    }
+    
+    .alert-card {
+      background: linear-gradient(135deg, rgba(20, 27, 45, 0.8) 0%, rgba(15, 22, 36, 0.9) 100%);
+      backdrop-filter: blur(30px) saturate(200%);
+      -webkit-backdrop-filter: blur(30px) saturate(200%);
+      border-radius: var(--radius-lg);
+      padding: var(--spacing-lg);
+      border: 1px solid rgba(0, 229, 255, 0.2);
+      box-shadow: 
+        0 20px 60px rgba(0, 0, 0, 0.4),
+        0 0 0 1px rgba(0, 229, 255, 0.1),
+        inset 0 1px 1px rgba(255, 255, 255, 0.1);
+      margin-bottom: var(--spacing-md);
+      color: var(--text-primary);
+      font-family: 'Cairo', sans-serif;
+    }
+    
+    .alert-card.weather {
+      border-right: 4px solid var(--neon-cyan);
+    }
+    
+    .alert-card.price {
+      border-right: 4px solid #10B981;
+    }
+    
+    .alert-card.safety {
+      border-right: 4px solid #EF4444;
+    }
+    
+    .alert-card.flight {
+      border-right: 4px solid #F59E0B;
+    }
+    
+    .alert-card.cultural {
+      border-right: 4px solid #8B5CF6;
+    }
+    
+    .alert-header {
+      display: flex;
+      align-items: center;
+      gap: var(--spacing-md);
+      margin-bottom: var(--spacing-md);
+    }
+    
+    .alert-icon {
+      font-size: 2.5rem;
+      width: 60px;
+      height: 60px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: rgba(0, 229, 255, 0.1);
+      border-radius: var(--radius-md);
+      border: 1px solid rgba(0, 229, 255, 0.2);
+    }
+    
+    .alert-title {
+      font-size: 1.3rem;
+      font-weight: 700;
+      color: var(--text-primary);
+      margin: 0;
+      font-family: 'Cairo', sans-serif;
+    }
+    
+    .alert-description {
+      color: var(--text-secondary);
+      margin-bottom: var(--spacing-md);
+      line-height: 1.6;
+      font-size: 0.95rem;
+    }
+    
+    .alert-footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding-top: var(--spacing-md);
+      border-top: 1px solid rgba(0, 229, 255, 0.1);
+    }
+    
+    .alert-time {
+      color: var(--text-muted);
+      font-size: 0.85rem;
+    }
+    
+    .empty-state {
+      text-align: center;
+      padding: var(--spacing-xl);
+      color: var(--text-secondary);
+    }
+    
+    .empty-state h3 {
+      font-size: 1.5rem;
+      margin-bottom: var(--spacing-sm);
+      color: var(--text-primary);
+      font-family: 'Cairo', sans-serif;
+    }
+    
+    .notification-badge {
+      position: fixed;
+      top: 80px;
+      right: 20px;
+      background: rgba(239, 68, 68, 0.95);
+      color: #fff;
+      padding: 16px 24px;
+      border-radius: 12px;
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+      z-index: 10000;
+      display: none;
+      font-family: 'Cairo', sans-serif;
+    }
+    
+    .notification-badge.show {
+      display: block;
+    }
+  </style>
+</head>
+<body class="page-hidden">
+  <nav class="arhgo-nav">
+    <div class="arhgo-logo">ArhGo</div>
+    <ul>
+      <li><a data-nav href="index.html">الرئيسية</a></li>
+      <li><a data-nav href="analytics.html">التحليلات</a></li>
+      <li><a data-nav href="price-comparison.html">مقارنة الأسعار</a></li>
+      <li><a data-nav href="budget-manager.html">إدارة الميزانية</a></li>
+    </ul>
+  </nav>
+
+  <div class="notification-badge" id="notificationBadge">
+    <strong>تنبيه جديد!</strong>
+    <div id="notificationText"></div>
+  </div>
+
+  <main class="alerts-container">
+    <div class="alerts-header">
+      <h1>تنبيهات ذكية</h1>
+      <p style="font-size: 1.1rem; color: var(--text-secondary); margin-bottom: 20px;">
+        تنبيهات فورية للطقس، الأسعار، الأمان، وتأخير الرحلات حسب وجهتك
+      </p>
+    </div>
+
+    <div class="country-selector">
+      <label for="selectedCountry">اختر الدولة لعرض التنبيهات الخاصة بها</label>
+      <select id="selectedCountry" class="arhgo-select">
+        <option value="">جميع الدول</option>
+        <option value="السعودية">السعودية</option>
+        <option value="الإمارات">الإمارات</option>
+        <option value="الكويت">الكويت</option>
+        <option value="قطر">قطر</option>
+        <option value="البحرين">البحرين</option>
+        <option value="عُمان">عُمان</option>
+        <option value="اليمن">اليمن</option>
+        <option value="العراق">العراق</option>
+        <option value="سوريا">سوريا</option>
+        <option value="الأردن">الأردن</option>
+        <option value="لبنان">لبنان</option>
+        <option value="فلسطين">فلسطين</option>
+      </select>
+    </div>
+
+    <div id="alertsList">
+      <!-- سيتم ملؤها بالتنبيهات -->
+    </div>
+  </main>
+
+  <script>
+    // قاعدة بيانات التنبيهات حسب الدولة
+    const countryAlerts = {
+      'السعودية': [
+        {
+          type: 'weather',
+          icon: '🌤️',
+          title: 'تنبيه الطقس - السعودية',
+          description: 'الطقس في الرياض: مشمس 32°C - مثالي للزيارة! الطقس في جدة: معتدل 28°C مع رطوبة عالية.',
+          time: 'منذ 5 دقائق',
+          priority: 'info'
+        },
+        {
+          type: 'cultural',
+          icon: '🕌',
+          title: 'نصيحة ثقافية',
+          description: 'تذكير: رمضان قادم قريباً. يرجى مراعاة أوقات الصيام عند التخطيط لرحلتك.',
+          time: 'منذ ساعة',
+          priority: 'info'
+        },
+        {
+          type: 'safety',
+          icon: '🛡️',
+          title: 'نصائح أمنية',
+          description: 'تأكد من وجود تأمين سفر صالح وتصريح السفر. احتفظ بنسخة من جواز السفر في مكان آمن.',
+          time: 'منذ 3 ساعات',
+          priority: 'info'
+        }
+      ],
+      'الإمارات': [
+        {
+          type: 'weather',
+          icon: '☀️',
+          title: 'تنبيه الطقس - الإمارات',
+          description: 'الطقس في دبي: مشمس 35°C - حار جداً. يفضل تجنب الأنشطة الخارجية في منتصف النهار.',
+          time: 'منذ 10 دقائق',
+          priority: 'warning'
+        },
+        {
+          type: 'price',
+          icon: '💰',
+          title: 'انخفاض في الأسعار',
+          description: 'انخفض سعر الفنادق في دبي بنسبة 20% هذا الأسبوع! فرصة رائعة للحجز.',
+          time: 'منذ ساعتين',
+          priority: 'success'
+        },
+        {
+          type: 'cultural',
+          icon: '🏙️',
+          title: 'فعاليات قادمة',
+          description: 'مهرجان دبي للتسوق يبدأ قريباً. توقع ازدحام في مراكز التسوق والفنادق.',
+          time: 'منذ 5 ساعات',
+          priority: 'info'
+        }
+      ],
+      'الكويت': [
+        {
+          type: 'weather',
+          icon: '🌡️',
+          title: 'تنبيه الطقس - الكويت',
+          description: 'الطقس في الكويت: حار جداً 40°C. يرجى شرب الكثير من الماء وتجنب التعرض المباشر للشمس.',
+          time: 'منذ 15 دقيقة',
+          priority: 'warning'
+        },
+        {
+          type: 'safety',
+          icon: '🛡️',
+          title: 'نصائح أمنية',
+          description: 'تأكد من وجود تأمين سفر صالح. الكويت آمنة بشكل عام، لكن احتفظ بنسخة من جواز السفر.',
+          time: 'منذ ساعة',
+          priority: 'info'
+        }
+      ],
+      'قطر': [
+        {
+          type: 'weather',
+          icon: '☀️',
+          title: 'تنبيه الطقس - قطر',
+          description: 'الطقس في الدوحة: مشمس 33°C. مثالي للزيارة مع الحذر من الحرارة العالية.',
+          time: 'منذ 20 دقيقة',
+          priority: 'info'
+        },
+        {
+          type: 'cultural',
+          icon: '🏛️',
+          title: 'معالم سياحية',
+          description: 'متحف الفن الإسلامي مفتوح للزيارة. يفضل الحجز مسبقاً خلال عطلة نهاية الأسبوع.',
+          time: 'منذ 4 ساعات',
+          priority: 'info'
+        }
+      ],
+      'البحرين': [
+        {
+          type: 'weather',
+          icon: '🌤️',
+          title: 'تنبيه الطقس - البحرين',
+          description: 'الطقس في المنامة: معتدل 30°C مع رطوبة عالية. مناسب للزيارة.',
+          time: 'منذ 25 دقيقة',
+          priority: 'info'
+        },
+        {
+          type: 'price',
+          icon: '💰',
+          title: 'عروض خاصة',
+          description: 'عروض خاصة على الفنادق في البحرين هذا الشهر. خصم يصل إلى 25%.',
+          time: 'منذ 6 ساعات',
+          priority: 'success'
+        }
+      ],
+      'عُمان': [
+        {
+          type: 'weather',
+          icon: '🌡️',
+          title: 'تنبيه الطقس - عُمان',
+          description: 'الطقس في مسقط: حار 36°C. الطقس في صلالة: معتدل 28°C - مثالي للزيارة.',
+          time: 'منذ 30 دقيقة',
+          priority: 'info'
+        },
+        {
+          type: 'cultural',
+          icon: '🏔️',
+          title: 'نصيحة سياحية',
+          description: 'جبال الحجر وجهة رائعة للمغامرة. تأكد من وجود مرشد محلي للرحلات الجبلية.',
+          time: 'منذ 7 ساعات',
+          priority: 'info'
+        }
+      ],
+      'اليمن': [
+        {
+          type: 'safety',
+          icon: '⚠️',
+          title: 'تحذير أمني',
+          description: 'يُنصح بالتحقق من آخر التحديثات الأمنية قبل السفر إلى اليمن. بعض المناطق قد تكون خطرة.',
+          time: 'منذ ساعة',
+          priority: 'warning'
+        }
+      ],
+      'العراق': [
+        {
+          type: 'safety',
+          icon: '🛡️',
+          title: 'نصائح أمنية',
+          description: 'يُنصح بالتحقق من آخر التحديثات الأمنية قبل السفر. بعض المناطق قد تتطلب تصاريح خاصة.',
+          time: 'منذ ساعتين',
+          priority: 'warning'
+        },
+        {
+          type: 'cultural',
+          icon: '🏛️',
+          title: 'معالم تاريخية',
+          description: 'بغداد غنية بالمعالم التاريخية. يفضل زيارة المتاحف في الصباح الباكر لتجنب الحرارة.',
+          time: 'منذ 8 ساعات',
+          priority: 'info'
+        }
+      ],
+      'سوريا': [
+        {
+          type: 'safety',
+          icon: '⚠️',
+          title: 'تحذير أمني',
+          description: 'يُنصح بالتحقق من آخر التحديثات الأمنية قبل السفر إلى سوريا. بعض المناطق قد تكون خطرة.',
+          time: 'منذ 3 ساعات',
+          priority: 'warning'
+        }
+      ],
+      'الأردن': [
+        {
+          type: 'weather',
+          icon: '🌤️',
+          title: 'تنبيه الطقس - الأردن',
+          description: 'الطقس في عمان: معتدل 26°C - مثالي للزيارة. الطقس في البتراء: دافئ 24°C.',
+          time: 'منذ 40 دقيقة',
+          priority: 'info'
+        },
+        {
+          type: 'cultural',
+          icon: '🏛️',
+          title: 'معالم سياحية',
+          description: 'البتراء وجهة رائعة. يفضل زيارة الصباح الباكر لتجنب الحشود والحرارة.',
+          time: 'منذ 9 ساعات',
+          priority: 'info'
+        },
+        {
+          type: 'price',
+          icon: '💰',
+          title: 'عروض خاصة',
+          description: 'عروض على الفنادق في الأردن. خصم يصل إلى 15% عند الحجز المبكر.',
+          time: 'منذ 12 ساعة',
+          priority: 'success'
+        }
+      ],
+      'لبنان': [
+        {
+          type: 'weather',
+          icon: '🌤️',
+          title: 'تنبيه الطقس - لبنان',
+          description: 'الطقس في بيروت: معتدل 22°C - مثالي للزيارة. الطقس في الجبال: بارد 15°C.',
+          time: 'منذ 45 دقيقة',
+          priority: 'info'
+        },
+        {
+          type: 'cultural',
+          icon: '🍽️',
+          title: 'نصيحة طعام',
+          description: 'لبنان مشهورة بمأكولاتها الشهية. جرب المطاعم المحلية في المناطق القديمة.',
+          time: 'منذ 10 ساعات',
+          priority: 'info'
+        }
+      ],
+      'فلسطين': [
+        {
+          type: 'safety',
+          icon: '🛡️',
+          title: 'نصائح أمنية',
+          description: 'يُنصح بالتحقق من آخر التحديثات الأمنية قبل السفر. بعض المناطق قد تتطلب تصاريح خاصة.',
+          time: 'منذ 4 ساعات',
+          priority: 'warning'
+        },
+        {
+          type: 'cultural',
+          icon: '🕌',
+          title: 'معالم دينية',
+          description: 'القدس غنية بالمعالم الدينية والتاريخية. يفضل زيارة الصباح الباكر.',
+          time: 'منذ 11 ساعة',
+          priority: 'info'
+        }
+      ]
+    };
+    
+    // تنبيهات عامة (لجميع الدول)
+    const generalAlerts = [
+      {
+        type: 'flight',
+        icon: '✈️',
+        title: 'تحديث الرحلة',
+        description: 'تأكد من التحقق من حالة رحلتك قبل 24 ساعة من موعد الإقلاع.',
+        time: 'منذ ساعتين',
+        priority: 'info'
+      },
+      {
+        type: 'safety',
+        icon: '🛡️',
+        title: 'نصائح أمنية عامة',
+        description: 'تذكير: احتفظ بنسخة من جواز السفر والتأمين في مكان آمن. احتفظ برقم السفارة في حالة الطوارئ.',
+        time: 'منذ 5 ساعات',
+        priority: 'info'
+      }
+    ];
+    
+    let currentCountry = '';
+    
+    // الحصول على الدولة من localStorage أو URL
+    function getSelectedCountry() {
+      // محاولة الحصول من localStorage (من فورم إنشاء الخطة)
+      const savedCountry = localStorage.getItem('selectedCountry') || localStorage.getItem('trip-country');
+      
+      // محاولة الحصول من URL parameters
+      const urlParams = new URLSearchParams(window.location.search);
+      const urlCountry = urlParams.get('country');
+      
+      return urlCountry || savedCountry || '';
+    }
+    
+    // عرض التنبيهات
+    function displayAlerts() {
+      const list = document.getElementById('alertsList');
+      const country = currentCountry || getSelectedCountry();
+      
+      let alerts = [];
+      
+      if (country && countryAlerts[country]) {
+        alerts = [...countryAlerts[country], ...generalAlerts];
+      } else if (!country) {
+        // إذا لم يتم اختيار دولة، عرض جميع التنبيهات
+        alerts = Object.values(countryAlerts).flat();
+        alerts = [...alerts, ...generalAlerts];
+      } else {
+        alerts = generalAlerts;
+      }
+      
+      if (alerts.length === 0) {
+        list.innerHTML = `
+          <div class="empty-state">
+            <h3>لا توجد تنبيهات</h3>
+            <p>اختر دولة لعرض التنبيهات الخاصة بها</p>
+          </div>
+        `;
+        return;
+      }
+      
+      list.innerHTML = alerts.map(alert => `
+        <div class="alert-card ${alert.type}">
+          <div class="alert-header">
+            <div class="alert-icon">${alert.icon}</div>
+            <h3 class="alert-title">${alert.title}</h3>
+          </div>
+          <p class="alert-description">${alert.description}</p>
+          <div class="alert-footer">
+            <span class="alert-time">${alert.time}</span>
+            <button class="btn btn-ghost" onclick="dismissAlert(this)" style="padding: 8px 16px; font-size: 0.85rem;">تمت القراءة</button>
+          </div>
+        </div>
+      `).join('');
+    }
+    
+    // إخفاء تنبيه
+    function dismissAlert(button) {
+      const card = button.closest('.alert-card');
+      if (card) {
+        card.style.opacity = '0';
+        card.style.transform = 'translateX(100px)';
+        setTimeout(() => {
+          card.remove();
+        }, 300);
+      }
+    }
+    
+    // إظهار إشعار
+    function showNotification(text) {
+      const badge = document.getElementById('notificationBadge');
+      const textEl = document.getElementById('notificationText');
+      textEl.textContent = text;
+      badge.classList.add('show');
+      
+      setTimeout(() => {
+        badge.classList.remove('show');
+      }, 5000);
+    }
+    
+    // تهيئة الصفحة
+    document.addEventListener('DOMContentLoaded', () => {
+      const countrySelect = document.getElementById('selectedCountry');
+      const savedCountry = getSelectedCountry();
+      
+      if (savedCountry) {
+        countrySelect.value = savedCountry;
+        currentCountry = savedCountry;
+      }
+      
+      displayAlerts();
+      
+      // تحديث التنبيهات عند تغيير الدولة
+      countrySelect.addEventListener('change', (e) => {
+        currentCountry = e.target.value;
+        localStorage.setItem('selectedCountry', currentCountry);
+        displayAlerts();
+      });
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ArhGo | حالة الطقس</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/css/arhgo.css">
+  <script src="assets/js/arhgo.js" defer></script>
+  <style>
+    body {
+      background: var(--bg-primary);
+      padding-top: 80px;
+    }
+    .weather-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: var(--spacing-md);
+      margin-top: var(--spacing-lg);
+    }
+    .weather-card {
+      padding: var(--spacing-lg);
+      border-radius: var(--radius-lg);
+      background: linear-gradient(135deg, rgba(20, 27, 45, 0.8) 0%, rgba(15, 22, 36, 0.9) 100%);
+      backdrop-filter: blur(30px) saturate(200%);
+      -webkit-backdrop-filter: blur(30px) saturate(200%);
+      border: 1px solid rgba(0, 229, 255, 0.2);
+      box-shadow: 
+        0 20px 60px rgba(0, 0, 0, 0.4),
+        0 0 0 1px rgba(0, 229, 255, 0.1),
+        inset 0 1px 1px rgba(255, 255, 255, 0.1);
+      text-align: center;
+      color: var(--text-primary);
+      font-family: 'Cairo', sans-serif;
+      transform: none !important;
+      transition: none !important;
+      will-change: auto !important;
+    }
+    
+    .weather-card:hover {
+      transform: none !important;
+      transition: none !important;
+      box-shadow: 
+        0 20px 60px rgba(0, 0, 0, 0.4),
+        0 0 0 1px rgba(0, 229, 255, 0.1),
+        inset 0 1px 1px rgba(255, 255, 255, 0.1) !important;
+    }
+  </style>
+</head>
+<body class="page-hidden">
+  <nav class="arhgo-nav">
+    <div class="arhgo-logo">ArhGo</div>
+    <ul>
+      <li><a data-nav href="index.html#home">الرئيسية</a></li>
+      <li><a data-nav href="index.html#features">المزايا</a></li>
+      <li><a data-nav href="index.html#planner">خطط رحلتك</a></li>
+      <li><a data-nav href="index.html#destinations">الوجهات</a></li>
+      <li><a data-nav href="hotel.html">الفنادق</a></li>
+      <li><a data-nav href="ticket-booking.html">حجز الرحلات</a></li>
+      <li><a data-nav href="Restuarnt.html">مطاعم</a></li>
+    </ul>
+    <div class="stack">
+      <a class="btn btn-ghost" href="login.html" data-flight-sound>تسجيل الدخول</a>
+      <a class="btn btn-gradient" href="signup.html" data-flight-sound>إنشاء حساب</a>
+    </div>
+  </nav>
+  <main class="page-shell">
+    <section class="section">
+      <div class="section-header">
+        <h2 class="section-title">ملخص الطقس</h2>
+        <p class="section-subtitle">تحقق من الطقس قبل مغامرتك، مع تحديثات مباشرة من WeatherAPI.</p>
+      </div>
+      <div class="split">
+        <div class="glass-card">
+          <label class="field">
+            <span>المدينة أو الدولة</span>
+            <input class="arhgo-input" type="text" id="city-input" placeholder="أدخل اسم المدينة">
+          </label>
+          <button class="btn btn-gradient" id="get-weather-btn" style="margin-top:16px;">عرض الطقس</button>
+          <a class="btn btn-ghost" href="index.html" data-flight-sound style="margin-top:12px;display:inline-flex;">العودة للرئيسية</a>
+        </div>
+        <div class="glass-card" id="weather-summary">
+          <h3>أحدث قراءة</h3>
+          <p id="summary-text">لم يتم البحث بعد.</p>
+        </div>
+      </div>
+      <div class="weather-grid" id="weather-cards"></div>
+    </section>
+  </main>
+
+  <script>
+    const apiKey = 'b4634de1e9ae48788f1153745250511';
+    const cards = document.getElementById('weather-cards');
+    const summary = document.getElementById('summary-text');
+    const defaultCountry = new URLSearchParams(window.location.search).get('country');
+    if (defaultCountry) {
+      document.getElementById('city-input').value = defaultCountry;
+    }
+
+    document.getElementById('get-weather-btn').addEventListener('click', fetchWeather);
+
+    async function fetchWeather() {
+      const city = document.getElementById('city-input').value.trim();
+      if (!city) {
+        alert('الرجاء إدخال اسم المدينة.');
+        return;
+      }
+      summary.textContent = 'جارٍ جلب البيانات...';
+      cards.innerHTML = '';
+      try {
+        const res = await fetch(`https://api.weatherapi.com/v1/current.json?key=${apiKey}&q=${encodeURIComponent(city)}&lang=ar`);
+        const data = await res.json();
+        if (data.error) {
+          summary.textContent = data.error.message;
+          return;
+        }
+        renderWeather(data);
+      } catch (err) {
+        summary.textContent = 'حدث خطأ أثناء جلب البيانات.';
+        console.error(err);
+      }
+    }
+
+    function renderWeather(data) {
+      summary.textContent = `${data.location.name}, ${data.location.country} — ${data.current.condition.text}`;
+      cards.innerHTML = `
+        <div class="weather-card">
+          <h3>الحرارة</h3>
+          <p style="font-size:2rem;">${Math.round(data.current.temp_c)}°C</p>
+        </div>
+        <div class="weather-card">
+          <h3>الرطوبة</h3>
+          <p>${data.current.humidity}%</p>
+        </div>
+        <div class="weather-card">
+          <h3>سرعة الرياح</h3>
+          <p>${data.current.wind_kph} كم/س</p>
+        </div>
+        <div class="weather-card">
+          <h3>ضغط الهواء</h3>
+          <p>${data.current.pressure_mb} مليبار</p>
+        </div>
+      `;
+    }
+
+    if (defaultCountry) {
+      fetchWeather();
+    }
+  </script>
+</body>
+</html>
+

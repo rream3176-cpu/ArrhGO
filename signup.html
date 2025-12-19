@@ -1,0 +1,833 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ArhGo | إنشاء حساب</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/css/arhgo.css">
+  <script src="assets/js/arhgo.js" defer></script>
+  <script src="assets/js/cosmic-animations.js" defer></script>
+  <script src="assets/js/user-auth.js"></script>
+  <style>
+    body {
+      background: var(--bg-primary);
+      min-height: 100vh;
+      position: relative;
+      overflow-x: hidden;
+    }
+    
+    .signup-container {
+      min-height: 100vh;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      position: relative;
+      z-index: 1;
+    }
+    
+    /* Left Side - Signup Form */
+    .signup-form-panel {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: var(--spacing-xl);
+      position: relative;
+      overflow-y: auto;
+    }
+    
+    .signup-form-wrapper {
+      width: 100%;
+      max-width: 500px;
+    }
+    
+    .signup-glass-card {
+      background: var(--glass-bg);
+      backdrop-filter: var(--glass-blur);
+      -webkit-backdrop-filter: var(--glass-blur);
+      border: 1px solid var(--glass-border);
+      border-radius: var(--radius-xl);
+      box-shadow: var(--shadow-card);
+      padding: var(--spacing-xl);
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .signup-glass-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 2px;
+      background: var(--gradient-primary);
+      opacity: 0.6;
+    }
+    
+    .signup-logo {
+      text-align: center;
+      margin-bottom: var(--spacing-lg);
+    }
+    
+    .signup-logo h1 {
+      font-size: 2.5rem;
+      background: var(--gradient-primary);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: var(--spacing-xs);
+      font-weight: 700;
+    }
+    
+    .signup-logo p {
+      color: var(--text-muted);
+      font-size: 0.9rem;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+    }
+    
+    .signup-form-wrapper h2 {
+      font-size: 1.75rem;
+      margin-bottom: var(--spacing-sm);
+      color: var(--text-primary);
+      font-weight: 600;
+    }
+    
+    .signup-form-wrapper .subtitle {
+      color: var(--text-secondary);
+      margin-bottom: var(--spacing-lg);
+      font-size: 1rem;
+    }
+    
+    .signup-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: var(--spacing-md);
+      margin-bottom: var(--spacing-md);
+    }
+    
+    .form-group {
+      margin-bottom: var(--spacing-md);
+    }
+    
+    .form-group label {
+      display: block;
+      margin-bottom: var(--spacing-xs);
+      color: var(--neon-cyan);
+      font-weight: 500;
+      font-size: 0.9rem;
+    }
+    
+    .auth-form {
+      margin-top: var(--spacing-lg);
+    }
+    
+    .auth-form .btn {
+      width: 100%;
+      margin-bottom: var(--spacing-sm);
+    }
+    
+    .error {
+      min-height: 24px;
+      color: #ff6b6b;
+      margin-top: var(--spacing-sm);
+      font-size: 0.9rem;
+      text-align: center;
+    }
+    
+    .terms-checkbox {
+      display: flex;
+      align-items: flex-start;
+      gap: var(--spacing-sm);
+      margin: var(--spacing-md) 0;
+      padding: var(--spacing-md);
+      background: rgba(0, 229, 255, 0.08);
+      border-radius: var(--radius-md);
+      border: 1px solid var(--glass-border);
+    }
+    
+    .terms-checkbox input[type="checkbox"] {
+      width: 20px;
+      height: 20px;
+      margin-top: 2px;
+      cursor: pointer;
+      accent-color: var(--neon-cyan);
+    }
+    
+    .terms-checkbox label {
+      font-size: 0.9rem;
+      color: var(--text-secondary);
+      line-height: 1.6;
+      cursor: pointer;
+    }
+    
+    .terms-checkbox a {
+      color: var(--neon-cyan);
+      text-decoration: underline;
+      font-weight: 600;
+    }
+    
+    .terms-checkbox a:hover {
+      color: var(--neon-teal);
+    }
+    
+    /* Right Side - Welcome Message */
+    .welcome-panel {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      padding: var(--spacing-xl);
+      background: 
+        radial-gradient(circle at 30% 50%, rgba(0, 229, 255, 0.08) 0%, transparent 50%),
+        radial-gradient(circle at 70% 80%, rgba(0, 207, 200, 0.08) 0%, transparent 50%);
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .welcome-content {
+      max-width: 500px;
+      text-align: center;
+      z-index: 2;
+    }
+    
+    .welcome-content h1 {
+      font-size: 3rem;
+      margin-bottom: var(--spacing-md);
+      background: var(--gradient-primary);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      line-height: 1.2;
+    }
+    
+    .welcome-content p {
+      font-size: 1.2rem;
+      color: var(--text-secondary);
+      line-height: 1.8;
+      margin-bottom: var(--spacing-lg);
+    }
+    
+    .welcome-features {
+      list-style: none;
+      text-align: right;
+      margin-top: var(--spacing-xl);
+    }
+    
+    .welcome-features li {
+      padding: var(--spacing-sm) 0;
+      color: var(--text-secondary);
+      font-size: 1rem;
+      display: flex;
+      align-items: center;
+      gap: var(--spacing-sm);
+    }
+    
+    .welcome-features li::before {
+      content: '✓';
+      color: var(--neon-cyan);
+      font-weight: 700;
+      font-size: 1.2rem;
+      text-shadow: 0 0 10px var(--neon-cyan-glow);
+    }
+    
+    /* Geometric Shapes */
+    .geometric-shapes {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 1;
+    }
+    
+    .shape {
+      position: absolute;
+      border: 1px solid rgba(0, 229, 255, 0.1);
+    }
+    
+    .shape-1 {
+      width: 300px;
+      height: 300px;
+      top: 10%;
+      left: 10%;
+      border-radius: 50%;
+      animation: rotate 20s linear infinite;
+    }
+    
+    .shape-2 {
+      width: 200px;
+      height: 200px;
+      bottom: 20%;
+      right: 15%;
+      border-radius: 50%;
+      animation: rotate 15s linear infinite reverse;
+    }
+    
+    .shape-3 {
+      width: 150px;
+      height: 150px;
+      top: 50%;
+      right: 20%;
+      transform: rotate(45deg);
+      border-radius: 8px;
+      animation: float 8s ease-in-out infinite;
+    }
+    
+    @keyframes rotate {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+    
+    @keyframes float {
+      0%, 100% { transform: translateY(0px) rotate(45deg); }
+      50% { transform: translateY(-10px) rotate(45deg); }
+    }
+    
+    /* Responsive */
+    @media (max-width: 968px) {
+      .signup-container {
+        grid-template-columns: 1fr;
+      }
+      
+      .welcome-panel {
+        display: none;
+      }
+      
+      .signup-form-panel {
+        padding: var(--spacing-lg);
+      }
+      
+      .signup-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+    
+    /* تأثير الغيوم المحسّن */
+    .clouds-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 9998;
+      opacity: 0;
+      transition: opacity 0.5s ease;
+      overflow: hidden;
+    }
+    
+    .clouds-overlay.active {
+      opacity: 1;
+    }
+    
+    .cloud {
+      position: absolute;
+      background: rgba(55, 214, 192, 0.3);
+      border-radius: 100px;
+      opacity: 0;
+      filter: blur(2px);
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+      animation: cloudFloat 5s ease-in-out forwards;
+    }
+    
+    .cloud::before,
+    .cloud::after {
+      content: '';
+      position: absolute;
+      background: rgba(55, 214, 192, 0.3);
+      border-radius: 100px;
+      filter: blur(1px);
+    }
+    
+    .cloud::before {
+      width: 60px;
+      height: 60px;
+      top: -30px;
+      left: 15px;
+    }
+    
+    .cloud::after {
+      width: 70px;
+      height: 70px;
+      top: -40px;
+      right: 15px;
+    }
+    
+    @keyframes cloudFloat {
+      0% {
+        transform: translateY(calc(100vh + 50px)) translateX(0) scale(0.3);
+        opacity: 0;
+      }
+      15% {
+        opacity: 0.9;
+      }
+      50% {
+        transform: translateY(50vh) translateX(10px) scale(1);
+        opacity: 0.95;
+      }
+      85% {
+        opacity: 0.9;
+      }
+      100% {
+        transform: translateY(-150px) translateX(20px) scale(1.2);
+        opacity: 0;
+      }
+    }
+    
+    /* تحسين الفورم */
+    .auth-form {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+    
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    
+    .form-group label {
+      font-weight: 600;
+      color: var(--primary);
+      font-size: 0.95rem;
+      margin-bottom: 4px;
+    }
+    
+    .terms-checkbox {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      margin: 20px 0;
+      padding: 16px;
+      background: rgba(55, 214, 192, 0.15);
+      border-radius: 12px;
+      border: 1px solid rgba(55, 214, 192, 0.4);
+    }
+    
+    .terms-checkbox input[type="checkbox"] {
+      width: 20px;
+      height: 20px;
+      margin-top: 2px;
+      cursor: pointer;
+      accent-color: var(--accent);
+    }
+    
+    .terms-checkbox label {
+      font-size: 0.9rem;
+      color: #F2F9FF;
+      line-height: 1.6;
+      cursor: pointer;
+    }
+    
+    .terms-checkbox a {
+      color: var(--accent);
+      text-decoration: underline;
+      font-weight: 600;
+    }
+    
+    .terms-checkbox a:hover {
+      color: var(--accent-dark);
+    }
+    
+  </style>
+</head>
+<body class="page-hidden">
+  <div class="geometric-shapes">
+    <div class="shape shape-1"></div>
+    <div class="shape shape-2"></div>
+    <div class="shape shape-3"></div>
+  </div>
+  
+  <div class="signup-container">
+    <!-- Left Side - Signup Form -->
+    <div class="signup-form-panel">
+      <div class="signup-form-wrapper">
+        <div class="signup-glass-card">
+          <div class="signup-logo">
+            <h1>ArhGo</h1>
+            <p>Smart Travel Planner</p>
+          </div>
+          
+          <h2>أنشئ حسابك المميز</h2>
+          <p class="subtitle">احتفظ بكل خطط السفر في حساب واحد، واستمتع بالمشاركة الفورية</p>
+          
+          <form class="auth-form" id="signupForm" onsubmit="event.preventDefault(); signup();">
+            <div class="signup-grid">
+              <div class="form-group">
+                <label for="username">اسم المستخدم</label>
+                <input class="arhgo-input" type="text" id="username" name="username" placeholder="اسم المستخدم" required>
+              </div>
+              <div class="form-group">
+                <label for="fullname">الاسم الكامل</label>
+                <input class="arhgo-input" type="text" id="fullname" name="fullname" placeholder="الاسم الكامل" required>
+              </div>
+              <div class="form-group">
+                <label for="email">البريد الإلكتروني</label>
+                <input class="arhgo-input" type="email" id="email" name="email" placeholder="email@example.com" required>
+              </div>
+              <div class="form-group">
+                <label for="password">كلمة المرور</label>
+                <input class="arhgo-input" type="password" id="password" name="password" placeholder="••••••••" required minlength="8">
+              </div>
+              <div class="form-group">
+                <label for="confirm">تأكيد كلمة المرور</label>
+                <input class="arhgo-input" type="password" id="confirm" name="confirm" placeholder="••••••••" required>
+              </div>
+            </div>
+            
+            <div class="terms-checkbox">
+              <input type="checkbox" id="terms" name="terms" required>
+              <label for="terms">
+                أوافق على <a href="#" onclick="event.preventDefault(); showTerms();">الشروط والأحكام</a> و
+                <a href="#" onclick="event.preventDefault(); showPrivacy();">سياسة الخصوصية</a>
+              </label>
+            </div>
+            
+            <button type="submit" class="btn btn-gradient" data-flight-sound>إنشاء الحساب</button>
+            <a class="btn btn-ghost" href="login.html" data-flight-sound style="display:block; text-align:center;">لديك حساب؟ تسجيل الدخول</a>
+            <div id="error" class="error"></div>
+          </form>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Right Side - Welcome Message -->
+    <div class="welcome-panel">
+      <div class="welcome-content">
+        <h1>Join the Future of Travel Planning</h1>
+        <p>ابدأ رحلتك مع منصة تخطيط السفر الأكثر ذكاءً وأناقة</p>
+        
+        <ul class="welcome-features">
+          <li>حساب مجاني مدى الحياة</li>
+          <li>حفظ غير محدود للخطط</li>
+          <li>مشاركة فورية مع الأصدقاء</li>
+          <li>اقتراحات ذكية مخصصة</li>
+          <li>مزامنة على جميع الأجهزة</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <div class="clouds-overlay" id="cloudsOverlay"></div>
+
+  <script>
+    function playFlightSoundEffect() {
+      console.log('Attempting to play flight sound...');
+      
+      // محاولة 1: استخدام ArhGo API
+      if (window.ArhGo && typeof window.ArhGo.playFlightSound === 'function') {
+        try {
+          window.ArhGo.playFlightSound();
+          console.log('Using ArhGo API');
+        } catch (e) {
+          console.log('ArhGo API failed:', e);
+        }
+      }
+      
+      // محاولة 2: إنشاء موسيقى لطيفة باستخدام Web Audio API (يعمل دائماً)
+      try {
+        const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+        
+        // إنشاء موسيقى لطيفة وناعمة جداً
+        const createGentleMusic = () => {
+          const duration = 3.5; // 3.5 ثانية
+          const sampleRate = audioContext.sampleRate;
+          const buffer = audioContext.createBuffer(2, sampleRate * duration, sampleRate); // Stereo
+          const leftChannel = buffer.getChannelData(0);
+          const rightChannel = buffer.getChannelData(1);
+          
+          // نغمات موسيقية لطيفة وناعمة (C major chord - أعلى وأكثر لطفاً)
+          const noteC = 261.63; // C4
+          const noteE = 329.63; // E4
+          const noteG = 392.00; // G4
+          const noteC2 = 523.25; // C5
+          const noteE2 = 659.25; // E5 (أعلى وأكثر لطفاً)
+          const noteG2 = 783.99; // G5
+          
+          for (let i = 0; i < buffer.length; i++) {
+            const t = i / sampleRate;
+            const progress = t / duration;
+            
+            // لحن لطيف ومتغير (melody progression)
+            let melodyNote = noteC;
+            if (progress < 0.3) {
+              melodyNote = noteC;
+            } else if (progress < 0.6) {
+              melodyNote = noteE;
+            } else {
+              melodyNote = noteG;
+            }
+            
+            // نغمات متناسقة لطيفة جداً (C major chord - أكثر نعومة)
+            const wave1 = Math.sin(2 * Math.PI * noteC * t) * 0.15;
+            const wave2 = Math.sin(2 * Math.PI * noteE * t) * 0.13;
+            const wave3 = Math.sin(2 * Math.PI * noteG * t) * 0.11;
+            const wave4 = Math.sin(2 * Math.PI * noteC2 * t) * 0.10;
+            
+            // نغمات عالية لطيفة جداً
+            const wave5 = Math.sin(2 * Math.PI * noteE2 * t) * 0.08;
+            const wave6 = Math.sin(2 * Math.PI * noteG2 * t) * 0.06;
+            
+            // لحن متحرك لطيف جداً (أكثر نعومة)
+            const melody = Math.sin(2 * Math.PI * melodyNote * t) * (0.08 + Math.sin(t * 1.2) * 0.015);
+            
+            // إضافة harmonics لطيفة وناعمة جداً
+            const harmonic1 = Math.sin(2 * Math.PI * noteC * 2 * t) * 0.04;
+            const harmonic2 = Math.sin(2 * Math.PI * noteE * 2 * t) * 0.03;
+            const harmonic3 = Math.sin(2 * Math.PI * noteG * 2 * t) * 0.02;
+            
+            // موجة خلفية ناعمة جداً
+            const background = Math.sin(2 * Math.PI * (noteC * 0.5) * t) * 0.025;
+            
+            // دمج جميع النغمات بشكل لطيف جداً
+            const sound = wave1 + wave2 + wave3 + wave4 + wave5 + wave6 + 
+                         melody + harmonic1 + harmonic2 + harmonic3 + background;
+            
+            // Envelope - fade in/out سلس جداً (أكثر نعومة)
+            let envelope = 1;
+            if (progress < 0.25) {
+              envelope = Math.pow(progress / 0.25, 0.3); // Fade in ناعم جداً
+            } else if (progress > 0.75) {
+              envelope = Math.pow((1 - progress) / 0.25, 0.3); // Fade out ناعم جداً
+            }
+            
+            const finalSound = sound * envelope * 0.65;
+            
+            // Stereo effect لطيف
+            const pan = Math.sin(progress * Math.PI * 0.5) * 0.08;
+            leftChannel[i] = finalSound * (0.92 - pan);
+            rightChannel[i] = finalSound * (0.92 + pan);
+          }
+          
+          return buffer;
+        };
+        
+        const buffer = createGentleMusic();
+        const source = audioContext.createBufferSource();
+        const gainNode = audioContext.createGain();
+        const lowpass = audioContext.createBiquadFilter();
+        
+        // Lowpass filter لموسيقى لطيفة وناعمة جداً
+        lowpass.type = 'lowpass';
+        lowpass.frequency.value = 5500; // أكثر نعومة
+        lowpass.Q.value = 0.4; // أكثر لطفاً
+        
+        source.buffer = buffer;
+        source.connect(lowpass);
+        lowpass.connect(gainNode);
+        gainNode.connect(audioContext.destination);
+        
+        // Volume envelope - fade in/out لطيف (صوت أعلى)
+        gainNode.gain.setValueAtTime(0, audioContext.currentTime);
+        gainNode.gain.linearRampToValueAtTime(0.8, audioContext.currentTime + 0.4);
+        gainNode.gain.setValueAtTime(0.8, audioContext.currentTime + 3.0);
+        gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 3.5);
+        
+        source.start(audioContext.currentTime);
+        source.stop(audioContext.currentTime + 3.5);
+        
+        console.log('Gentle music playing');
+        
+      } catch (e) {
+        console.log('Web Audio API failed:', e);
+        
+        // محاولة 3: استخدام Audio object مع رابط مباشر
+        try {
+          const audio = new Audio();
+          audio.volume = 0.7;
+          
+          // استخدام رابط من CDN موثوق
+          audio.src = 'https://actions.google.com/sounds/v1/transportation/airplane_flyby.ogg';
+          
+          audio.play().then(() => {
+            console.log('Direct audio playing');
+          }).catch(err => {
+            console.log('Direct audio failed:', err);
+          });
+        } catch (e2) {
+          console.log('All sound methods failed');
+        }
+      }
+    }
+    
+    function createClouds() {
+      const overlay = document.getElementById('cloudsOverlay');
+      overlay.innerHTML = '';
+      overlay.classList.add('active');
+      
+      // إنشاء غيوم مرتبة ومنظمة
+      const cloudPositions = [
+        { left: '10%', delay: 0, size: 120 },
+        { left: '25%', delay: 0.3, size: 100 },
+        { left: '40%', delay: 0.6, size: 140 },
+        { left: '55%', delay: 0.9, size: 110 },
+        { left: '70%', delay: 1.2, size: 130 },
+        { left: '85%', delay: 1.5, size: 105 },
+        { left: '15%', delay: 1.8, size: 115 },
+        { left: '30%', delay: 2.1, size: 125 },
+        { left: '45%', delay: 2.4, size: 135 },
+        { left: '60%', delay: 2.7, size: 100 },
+        { left: '75%', delay: 3.0, size: 120 },
+        { left: '20%', delay: 3.3, size: 110 },
+        { left: '35%', delay: 3.6, size: 140 },
+        { left: '50%', delay: 3.9, size: 115 },
+        { left: '65%', delay: 4.2, size: 125 }
+      ];
+      
+      cloudPositions.forEach((pos, i) => {
+        const cloud = document.createElement('div');
+        cloud.className = 'cloud';
+        cloud.style.width = pos.size + 'px';
+        cloud.style.height = (pos.size * 0.6) + 'px';
+        cloud.style.left = pos.left;
+        cloud.style.animationDelay = pos.delay + 's';
+        cloud.style.animationDuration = '5s';
+        overlay.appendChild(cloud);
+      });
+      
+      setTimeout(() => {
+        overlay.classList.remove('active');
+        setTimeout(() => {
+          overlay.innerHTML = '';
+        }, 500);
+      }, 5000);
+    }
+    
+    function showTerms() {
+      alert('الشروط والأحكام:\n\n1. يجب أن تكون كلمة المرور 8 أحرف على الأقل\n2. يجب استخدام بريد إلكتروني صحيح\n3. أنت مسؤول عن الحفاظ على سرية حسابك\n4. ArhGo تحتفظ بالحق في تعليق الحساب في حالة انتهاك الشروط');
+    }
+    
+    function showPrivacy() {
+      alert('سياسة الخصوصية:\n\n1. نحن نحترم خصوصيتك ونحمي بياناتك الشخصية\n2. بياناتك محفوظة محلياً في متصفحك فقط\n3. لا نشارك بياناتك مع أي طرف ثالث\n4. يمكنك حذف حسابك في أي وقت');
+    }
+    
+    async function signup() {
+      const username = document.getElementById('username').value.trim();
+      const fullname = document.getElementById('fullname').value.trim();
+      const email = document.getElementById('email').value.trim().toLowerCase();
+      const password = document.getElementById('password').value;
+      const confirm = document.getElementById('confirm').value;
+      const terms = document.getElementById('terms').checked;
+      const error = document.getElementById('error');
+      error.textContent = '';
+      error.style.color = '';
+
+      // التحقق من الحقول
+      if (!username || !fullname || !email || !password || !confirm) {
+        error.style.color = 'var(--danger)';
+        error.textContent = "يرجى تعبئة جميع الحقول.";
+        return;
+      }
+      
+      // التحقق من كلمة المرور
+      if (password.length < 6) {
+        error.style.color = 'var(--danger)';
+        error.textContent = "كلمة المرور يجب أن تكون 6 أحرف على الأقل.";
+        return;
+      }
+      
+      if (password !== confirm) {
+        error.style.color = 'var(--danger)';
+        error.textContent = "كلمتا المرور غير متطابقتين.";
+        return;
+      }
+      
+      // التحقق من القواعد والشروط
+      if (!terms) {
+        error.style.color = 'var(--danger)';
+        error.textContent = "يجب الموافقة على الشروط والأحكام.";
+        return;
+      }
+      
+      // التحقق من البريد الإلكتروني
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(email)) {
+        error.style.color = 'var(--danger)';
+        error.textContent = "يرجى إدخال بريد إلكتروني صحيح.";
+        return;
+      }
+
+      try {
+        // تحديد URL الأساسي
+        let baseUrl = '';
+        if (window.location.protocol === 'file:') {
+          baseUrl = 'http://localhost/ArhGo-trip-planner/';
+        }
+        
+        // تسجيل المستخدم الجديد
+        const response = await fetch(baseUrl + 'api/register.php', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            full_name: fullname,
+            email: email,
+            password: password,
+            phone: '',
+            country: '',
+            city: ''
+          })
+        });
+        
+        const result = await response.json();
+        
+        if (result.success) {
+          // تسجيل الدخول تلقائياً
+          const loginResponse = await fetch(baseUrl + 'api/login.php', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+              email: email,
+              password: password
+            })
+          });
+          
+          const loginResult = await loginResponse.json();
+          
+          if (loginResult.success) {
+            // حفظ بيانات الجلسة والمستخدم
+            localStorage.setItem('session_token', loginResult.session_token);
+            localStorage.setItem('user', JSON.stringify(loginResult.user));
+            localStorage.setItem('arhgo_current_user', loginResult.user.full_name);
+            localStorage.setItem('loggedIn', loginResult.user.full_name);
+            
+            // إرسال event لتحديث الصفحات الأخرى
+            window.dispatchEvent(new Event('authStateChanged'));
+            
+            error.style.color = '#4DFFD1';
+            error.textContent = "تم إنشاء الحساب بنجاح! جاري التحويل...";
+            
+            // تشغيل الموسيقى
+            playFlightSoundEffect();
+            
+            // إظهار الغيوم
+            createClouds();
+            
+            // الانتقال بعد 1.5 ثانية
+            setTimeout(() => {
+              window.location.href = 'index.html?t=' + Date.now();
+            }, 1500);
+          } else {
+            error.style.color = 'var(--danger)';
+            error.textContent = loginResult.error || "تم إنشاء الحساب لكن فشل تسجيل الدخول. يرجى تسجيل الدخول يدوياً.";
+          }
+        } else {
+          error.style.color = 'var(--danger)';
+          error.textContent = result.error || 'حدث خطأ أثناء إنشاء الحساب';
+        }
+      } catch (err) {
+        console.error('خطأ في التسجيل:', err);
+        error.style.color = 'var(--danger)';
+        error.textContent = 'حدث خطأ في الاتصال بالخادم. تأكد من أن WAMP/XAMPP يعمل.';
+      }
+    }
+  </script>
+</body>
+</html>

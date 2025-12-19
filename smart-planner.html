@@ -1,0 +1,967 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ArhGo | مولد خطط ذكي</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/css/arhgo.css">
+  <script src="assets/js/arhgo.js" defer></script>
+  <script src="assets/js/countries-database.js"></script>
+  <script src="assets/js/plan-manager.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <style>
+    body {
+      background: var(--bg-primary);
+      padding-top: 80px;
+      font-family: 'Cairo', sans-serif !important;
+    }
+    
+    .planner-container {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: var(--spacing-md) var(--spacing-lg);
+    }
+    
+    .page-header {
+      text-align: center;
+      margin-bottom: var(--spacing-md);
+    }
+    
+    .page-header h1 {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: var(--text-primary);
+      margin-bottom: 4px;
+      font-family: 'Cairo', sans-serif;
+    }
+    
+    .page-header p {
+      font-size: 0.9rem;
+      color: var(--text-secondary);
+      font-family: 'Cairo', sans-serif;
+    }
+    
+    .plan-card {
+      border-radius: var(--radius-md);
+      padding: var(--spacing-md);
+      background: linear-gradient(135deg, rgba(20, 27, 45, 0.8) 0%, rgba(15, 22, 36, 0.9) 100%);
+      backdrop-filter: blur(30px) saturate(200%);
+      -webkit-backdrop-filter: blur(30px) saturate(200%);
+      border: 1px solid rgba(0, 229, 255, 0.2);
+      box-shadow: 
+        0 20px 60px rgba(0, 0, 0, 0.4),
+        0 0 0 1px rgba(0, 229, 255, 0.1),
+        inset 0 1px 1px rgba(255, 255, 255, 0.1);
+      margin-bottom: var(--spacing-md);
+    }
+    
+    .plan-header {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      gap: var(--spacing-sm);
+      margin-bottom: var(--spacing-md);
+      padding-bottom: var(--spacing-sm);
+      border-bottom: 1px solid rgba(0, 229, 255, 0.2);
+    }
+    
+    .plan-info-item {
+      text-align: center;
+      font-family: 'Cairo', sans-serif;
+    }
+    
+    .plan-info-label {
+      font-size: 0.75rem;
+      color: var(--text-secondary);
+      margin-bottom: 4px;
+    }
+    
+    .plan-info-value {
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: var(--text-primary);
+    }
+    
+    .day-section {
+      margin-bottom: var(--spacing-md);
+      padding-bottom: var(--spacing-md);
+      border-bottom: 1px solid rgba(0, 229, 255, 0.15);
+    }
+    
+    .day-section:last-child {
+      border-bottom: none;
+      margin-bottom: 0;
+      padding-bottom: 0;
+    }
+    
+    .day-title {
+      font-size: 1rem;
+      font-weight: 700;
+      color: var(--text-primary);
+      margin-bottom: var(--spacing-sm);
+      padding-bottom: var(--spacing-xs);
+      border-bottom: 1px solid rgba(0, 229, 255, 0.2);
+      font-family: 'Cairo', sans-serif;
+    }
+    
+    .time-slot {
+      margin-bottom: var(--spacing-sm);
+    }
+    
+    .time-slot:last-child {
+      margin-bottom: 0;
+    }
+    
+    .time-slot-title {
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: var(--neon-cyan);
+      margin-bottom: 6px;
+      font-family: 'Cairo', sans-serif;
+    }
+    
+    .time-slot-activities {
+      margin-right: var(--spacing-sm);
+    }
+    
+    .activity-item {
+      padding: 8px 10px;
+      background: rgba(0, 229, 255, 0.08);
+      border-radius: 6px;
+      margin-bottom: 6px;
+      border-right: 2px solid rgba(0, 229, 255, 0.3);
+      font-family: 'Cairo', sans-serif;
+    }
+    
+    .activity-item:last-child {
+      margin-bottom: 0;
+    }
+    
+    .activity-name {
+      font-size: 0.85rem;
+      color: var(--text-primary);
+      font-weight: 600;
+      margin-bottom: 4px;
+    }
+    
+    .activity-details {
+      font-size: 0.75rem;
+      color: var(--text-secondary);
+      line-height: 1.5;
+    }
+    
+    .actions {
+      display: flex;
+      gap: var(--spacing-sm);
+      justify-content: center;
+      margin-top: var(--spacing-md);
+      flex-wrap: wrap;
+    }
+    
+    .actions .btn {
+      font-family: 'Cairo', sans-serif;
+      font-weight: 600;
+      padding: 8px 16px;
+      font-size: 0.9rem;
+    }
+    
+    
+    .message {
+      text-align: center;
+      margin-top: var(--spacing-sm);
+      min-height: 20px;
+      font-size: 0.85rem;
+      font-family: 'Cairo', sans-serif;
+    }
+    
+    @media (max-width: 768px) {
+      .planner-container {
+        padding: var(--spacing-sm);
+      }
+      
+      .page-header h1 {
+        font-size: 1.3rem;
+      }
+      
+      .plan-header {
+        grid-template-columns: repeat(2, 1fr);
+      }
+      
+      .day-activities {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body class="page-hidden">
+  <nav class="arhgo-nav">
+    <div class="arhgo-logo">ArhGo</div>
+    <ul>
+      <li><a data-nav href="index.html">الرئيسية</a></li>
+      <li><a data-nav href="analytics.html">التحليلات</a></li>
+      <li><a data-nav href="budget-manager.html">إدارة الميزانية</a></li>
+      <li><a data-nav href="price-comparison.html">مقارنة الأسعار</a></li>
+      <li><a data-nav href="smart-alerts.html">التنبيهات</a></li>
+    </ul>
+  </nav>
+
+  <main class="planner-container">
+    <div class="page-header">
+      <h1>مولد خطط ذكي</h1>
+      <p>خطة سفر محسّنة ومخصصة لك</p>
+    </div>
+
+    <div class="plan-card">
+      <div class="plan-header" id="tripInfo"></div>
+      <div id="dailyPlans"></div>
+      </div>
+      
+    <div class="actions" id="planActions" style="display: none;">
+      <button id="savePlanBtn" class="btn btn-gradient">حفظ الخطة</button>
+      <button id="sharePlanBtn" class="btn btn-ghost">مشاركة الخطة</button>
+    </div>
+
+    <div class="message" id="planMessage"></div>
+  </main>
+
+  <script>
+    // الدول العربية في آسيا فقط
+    const arabCountriesAsia = ['السعودية', 'الإمارات', 'الكويت', 'قطر', 'البحرين', 'عُمان', 'عمان', 'اليمن', 'العراق', 'سوريا', 'الأردن', 'لبنان', 'فلسطين'];
+    
+    // دالة للحصول على بيانات دولة معينة من MySQL
+    let countryDataCache = {};
+    
+    async function getCountryData(countryName) {
+      // تنظيف اسم الدولة
+      countryName = countryName.trim();
+      
+      // التحقق من الكاش أولاً
+      if (countryDataCache[countryName]) {
+        return countryDataCache[countryName];
+      }
+      
+      // استخدام البيانات الافتراضية مباشرة (أسرع)
+      const defaultData = {
+        'السعودية': {
+          cities: ['الرياض', 'جدة', 'الدمام', 'المدينة المنورة', 'مكة المكرمة'],
+          attractions: {
+            cultural: ['قصر المصمك', 'متحف الملك عبدالعزيز', 'قلعة الرياض', 'متحف قصر المربع'],
+            nature: ['وادي حنيفة', 'منتزه الملك عبدالله', 'وادي نمار', 'حديقة الملك فهد'],
+            adventure: ['رحلة صحراوية', 'تسلق الجبال', 'رياضات مائية'],
+            food: ['مطعم النخيل', 'مطعم الشرق', 'مطعم البيك']
+          },
+          budget: { low: 30, medium: 60, high: 120 },
+          timeSlots: { morning: '08:00-12:00', afternoon: '14:00-17:00', evening: '19:00-22:00' },
+          optimalRoute: true
+        },
+        'الإمارات': {
+          cities: ['دبي', 'أبوظبي', 'الشارقة', 'عجمان'],
+          attractions: {
+            cultural: ['برج خليفة', 'متحف اللوفر أبوظبي', 'مسجد الشيخ زايد', 'قصر الإمارات'],
+            nature: ['شاطئ جميرا', 'حديقة دبي', 'وادي المغامرات', 'الصحراء'],
+            adventure: ['قفز بالمظلة', 'رياضات مائية', 'رحلة صحراوية'],
+            food: ['مطعم At.mosphere', 'مطعم Zuma', 'مطعم Nobu']
+          },
+          budget: { low: 80, medium: 160, high: 320 },
+          timeSlots: { morning: '09:00-12:00', afternoon: '15:00-18:00', evening: '20:00-23:00' },
+          optimalRoute: true
+        },
+        'الكويت': {
+          cities: ['الكويت', 'السالمية', 'الجهراء'],
+          attractions: {
+            cultural: ['أبراج الكويت', 'متحف الكويت الوطني', 'قصر السيف', 'المتحف العلمي'],
+            nature: ['شاطئ الكويت', 'حديقة الشهيد', 'جزيرة فيلكا'],
+            adventure: ['رياضات مائية', 'رحلة بحرية'],
+            food: ['مطعم الكويت', 'مطعم الشاطئ', 'مطعم السفن']
+          },
+          budget: { low: 40, medium: 80, high: 160 },
+          timeSlots: { morning: '09:00-12:00', afternoon: '14:00-17:00', evening: '19:00-22:00' },
+          optimalRoute: true
+        },
+        'قطر': {
+          cities: ['الدوحة', 'الريان', 'الخور'],
+          attractions: {
+            cultural: ['متحف قطر الوطني', 'متحف الفن الإسلامي', 'سوق واقف', 'قصر الدوحة'],
+            nature: ['شاطئ الخور', 'حديقة أسباير', 'الصحراء'],
+            adventure: ['رياضات مائية', 'رحلة صحراوية'],
+            food: ['مطعم قطر', 'مطعم السوق', 'مطعم الخليج']
+          },
+          budget: { low: 70, medium: 140, high: 280 },
+          timeSlots: { morning: '09:00-12:00', afternoon: '14:00-17:00', evening: '19:00-22:00' },
+          optimalRoute: true
+        },
+        'البحرين': {
+          cities: ['المنامة', 'المحرق', 'سترة'],
+          attractions: {
+            cultural: ['قلعة البحرين', 'متحف البحرين الوطني', 'مسجد الفاتح', 'بيت القرآن'],
+            nature: ['شاطئ البحرين', 'حديقة العرين', 'جزيرة أمواج'],
+            adventure: ['رياضات مائية', 'رحلة بحرية'],
+            food: ['مطعم البحرين', 'مطعم الخليج', 'مطعم السوق']
+          },
+          budget: { low: 35, medium: 70, high: 140 },
+          timeSlots: { morning: '09:00-12:00', afternoon: '14:00-17:00', evening: '19:00-22:00' },
+          optimalRoute: true
+        },
+        'عُمان': {
+          cities: ['مسقط', 'صلالة', 'نزوى', 'صور'],
+          attractions: {
+            cultural: ['قصر السلطان', 'متحف عمان الوطني', 'قلعة نزوى', 'سوق مطرح'],
+            nature: ['وادي شاب', 'جبل شمس', 'شاطئ مسقط', 'وادي بني خالد'],
+            adventure: ['تسلق الجبال', 'رحلة صحراوية', 'رياضات مائية'],
+            food: ['مطعم عمان', 'مطعم الجبل', 'مطعم الساحل']
+          },
+          budget: { low: 35, medium: 70, high: 140 },
+          timeSlots: { morning: '08:00-12:00', afternoon: '14:00-17:00', evening: '19:00-22:00' },
+          optimalRoute: true
+        },
+        'عمان': {
+          cities: ['مسقط', 'صلالة', 'نزوى', 'صور'],
+          attractions: {
+            cultural: ['قصر السلطان', 'متحف عمان الوطني', 'قلعة نزوى', 'سوق مطرح'],
+            nature: ['وادي شاب', 'جبل شمس', 'شاطئ مسقط', 'وادي بني خالد'],
+            adventure: ['تسلق الجبال', 'رحلة صحراوية', 'رياضات مائية'],
+            food: ['مطعم عمان', 'مطعم الجبل', 'مطعم الساحل']
+          },
+          budget: { low: 35, medium: 70, high: 140 },
+          timeSlots: { morning: '08:00-12:00', afternoon: '14:00-17:00', evening: '19:00-22:00' },
+          optimalRoute: true
+        },
+        'اليمن': {
+          cities: ['صنعاء', 'عدن', 'تعز', 'حضرموت'],
+          attractions: {
+            cultural: ['صنعاء القديمة', 'قصر غمدان', 'متحف اليمن الوطني', 'سوق صنعاء'],
+            nature: ['جبل صبر', 'وادي حضرموت', 'شاطئ عدن'],
+            adventure: ['تسلق الجبال', 'رحلة صحراوية'],
+            food: ['مطعم اليمن', 'مطعم الحضرمي', 'مطعم السوق']
+          },
+          budget: { low: 20, medium: 40, high: 80 },
+          timeSlots: { morning: '08:00-12:00', afternoon: '14:00-17:00', evening: '19:00-22:00' },
+          optimalRoute: true
+        },
+        'العراق': {
+          cities: ['بغداد', 'البصرة', 'الموصل', 'أربيل', 'كربلاء'],
+          attractions: {
+            cultural: ['المتحف العراقي', 'أطلال بابل', 'المسجد الذهبي', 'قصر العاشق'],
+            nature: ['نهر دجلة', 'نهر الفرات', 'جبال كردستان'],
+            adventure: ['رحلة نهرية', 'تسلق الجبال'],
+            food: ['مطعم بغداد', 'مطعم الشط', 'مطعم الرافدين']
+          },
+          budget: { low: 25, medium: 50, high: 100 },
+          timeSlots: { morning: '08:00-12:00', afternoon: '14:00-17:00', evening: '19:00-22:00' },
+          optimalRoute: true
+        },
+        'سوريا': {
+          cities: ['دمشق', 'حلب', 'اللاذقية', 'طرطوس'],
+          attractions: {
+            cultural: ['قلعة حلب', 'تدمر', 'المتحف الوطني', 'مسجد الأموي'],
+            nature: ['جبال اللاذقية', 'وادي النهر', 'شاطئ اللاذقية'],
+            adventure: ['تسلق الجبال', 'رحلة صحراوية'],
+            food: ['مطعم سوريا', 'مطعم الشام', 'مطعم الساحل']
+          },
+          budget: { low: 20, medium: 40, high: 80 },
+          timeSlots: { morning: '08:00-12:00', afternoon: '14:00-17:00', evening: '19:00-22:00' },
+          optimalRoute: true
+        },
+        'الأردن': {
+          cities: ['عمان', 'البتراء', 'العقبة', 'إربد'],
+          attractions: {
+            cultural: ['البتراء', 'قلعة عمان', 'متحف الأردن', 'جبل نيبو'],
+            nature: ['البحر الميت', 'وادي رم', 'جبال عجلون'],
+            adventure: ['تسلق الجبال', 'رحلة صحراوية', 'رياضات مائية'],
+            food: ['مطعم الأردن', 'مطعم البتراء', 'مطعم البحر الميت']
+          },
+          budget: { low: 30, medium: 60, high: 120 },
+          timeSlots: { morning: '08:00-12:00', afternoon: '14:00-17:00', evening: '19:00-22:00' },
+          optimalRoute: true
+        },
+        'لبنان': {
+          cities: ['بيروت', 'طرابلس', 'صيدا', 'جبيل'],
+          attractions: {
+            cultural: ['متحف بيروت', 'قلعة بعلبك', 'متحف جبيل', 'قصر بيت الدين'],
+            nature: ['جبال لبنان', 'شاطئ بيروت', 'وادي قاديشا'],
+            adventure: ['تسلق الجبال', 'رياضات مائية'],
+            food: ['مطعم لبنان', 'مطعم بيروت', 'مطعم الساحل']
+          },
+          budget: { low: 40, medium: 80, high: 160 },
+          timeSlots: { morning: '09:00-12:00', afternoon: '14:00-17:00', evening: '19:00-22:00' },
+          optimalRoute: true
+        },
+        'فلسطين': {
+          cities: ['القدس', 'رام الله', 'بيت لحم', 'نابلس'],
+          attractions: {
+            cultural: ['المسجد الأقصى', 'كنيسة القيامة', 'متحف فلسطين', 'قصر هشام'],
+            nature: ['البحر الميت', 'جبل الزيتون', 'وادي الأردن'],
+            adventure: ['تسلق الجبال', 'رحلة صحراوية'],
+            food: ['مطعم فلسطين', 'مطعم القدس', 'مطعم بيت لحم']
+          },
+          budget: { low: 30, medium: 60, high: 120 },
+          timeSlots: { morning: '08:00-12:00', afternoon: '14:00-17:00', evening: '19:00-22:00' },
+          optimalRoute: true
+        }
+      };
+      
+      // البحث في البيانات الافتراضية (مع مراعاة المسافات)
+      const cleanName = countryName.trim();
+      console.log('البحث عن الدولة:', cleanName);
+      console.log('الدول المتاحة في البيانات الافتراضية:', Object.keys(defaultData));
+      
+      if (defaultData[cleanName]) {
+        countryDataCache[countryName] = defaultData[cleanName];
+        console.log('تم العثور على بيانات الدولة:', cleanName);
+        return defaultData[cleanName];
+      }
+      
+      // محاولة البحث بدون همزة
+      const nameWithoutHamza = cleanName.replace('عُمان', 'عمان').replace('عمان', 'عُمان');
+      if (defaultData[nameWithoutHamza]) {
+        countryDataCache[countryName] = defaultData[nameWithoutHamza];
+        console.log('تم العثور على بيانات الدولة (بدون همزة):', nameWithoutHamza);
+        return defaultData[nameWithoutHamza];
+      }
+      
+      // البحث في جميع المفاتيح
+      for (const key in defaultData) {
+        const cleanKey = key.trim();
+        if (cleanKey === cleanName || 
+            cleanKey.replace('عُمان', 'عمان') === cleanName.replace('عُمان', 'عمان')) {
+          countryDataCache[countryName] = defaultData[key];
+          console.log('تم العثور على بيانات الدولة (مطابقة):', key);
+          return defaultData[key];
+        }
+      }
+      
+      // إذا فشل كل شيء، أرجع null
+      console.error('الدولة غير موجودة في البيانات الافتراضية:', countryName);
+      console.error('الدول المتاحة:', Object.keys(defaultData));
+      return null;
+    }
+    
+    // قاعدة بيانات تفصيلية للأماكن السياحية
+    const placeDetailsDatabase = {
+      'السعودية': {
+        'الرياض': {
+          cultural: {
+            'قصر المصمك': {
+              description: 'قلعة تاريخية تعود للقرن التاسع عشر، كانت مسرحاً لمعركة استعادة الرياض. تحتوي على متحف يعرض تاريخ المملكة وتأسيسها.',
+              activities: ['زيارة المتحف', 'مشاهدة البوابات التاريخية', 'التصوير', 'جولة في القلعة'],
+              address: 'حي الديرة، الرياض',
+              bestTime: '09:00-12:00',
+              duration: '2-3 ساعات',
+              tips: 'احرص على ارتداء ملابس مريحة وخذ كاميرا معك'
+            },
+            'متحف الملك عبدالعزيز': {
+              description: 'متحف يوثق تاريخ المملكة العربية السعودية منذ تأسيسها وحتى الوقت الحاضر، يحتوي على معروضات أثرية وتاريخية نادرة.',
+              activities: ['جولة في المعارض', 'مشاهدة الوثائق التاريخية', 'التعرف على التراث', 'التصوير'],
+              address: 'حي المطار، الرياض',
+              bestTime: '10:00-13:00',
+              duration: '2-3 ساعات',
+              tips: 'احجز تذكرتك مسبقاً لتجنب الانتظار'
+            }
+          },
+          nature: {
+            'وادي حنيفة': {
+              description: 'وادي طبيعي خلاب يمتد عبر الرياض، يوفر مساحات خضراء واسعة ومناطق للتنزه والاسترخاء.',
+              activities: ['المشي', 'التنزه', 'التصوير', 'الاسترخاء', 'مشاهدة الطبيعة'],
+              address: 'وادي حنيفة، الرياض',
+              bestTime: '07:00-10:00 أو 16:00-19:00',
+              duration: '2-3 ساعات',
+              tips: 'احمل ماء وواقي شمس، أفضل وقت في الصباح الباكر'
+            }
+          }
+        }
+      },
+      'الإمارات': {
+        'دبي': {
+          cultural: {
+            'برج خليفة': {
+              description: 'أطول مبنى في العالم بارتفاع 828 متراً، يوفر إطلالات بانورامية خلابة على دبي من الطابق 124 و148.',
+              activities: ['صعود البرج', 'مشاهدة منصة المراقبة', 'التصوير من الأعلى', 'زيارة نافورة دبي'],
+              address: '1 Sheikh Mohammed bin Rashid Blvd, Dubai',
+              bestTime: '17:00-19:00 (لرؤية الغروب)',
+              duration: '2-3 ساعات',
+              tips: 'احجز تذكرتك مسبقاً، أفضل وقت عند الغروب'
+            },
+            'متحف اللوفر أبوظبي': {
+              description: 'متحف فني عالمي يضم مجموعة رائعة من الأعمال الفنية من مختلف الحضارات والثقافات.',
+              activities: ['زيارة المعارض', 'مشاهدة الأعمال الفنية', 'جولة في المتحف', 'التصوير'],
+              address: 'جزيرة السعديات، أبوظبي',
+              bestTime: '10:00-13:00',
+              duration: '3-4 ساعات',
+              tips: 'احجز تذكرتك مسبقاً، خذ وقتك في التجول'
+            }
+          },
+          nature: {
+            'شاطئ جميرا': {
+              description: 'شاطئ رائع مع مياه زرقاء صافية ورمال بيضاء ناعمة، مثالي للاسترخاء والسباحة.',
+              activities: ['السباحة', 'الاسترخاء', 'التصوير', 'مشاهدة الغروب', 'رياضات مائية'],
+              address: 'شاطئ جميرا، دبي',
+              bestTime: '08:00-11:00 أو 16:00-19:00',
+              duration: '3-4 ساعات',
+              tips: 'احمل واقي شمس ومظلة، تجنب وقت الظهيرة'
+            }
+          }
+        }
+      }
+    };
+    
+    function getPlaceDetails(placeName, city, country, type) {
+      // البحث في قاعدة البيانات المحلية أولاً
+      if (placeDetailsDatabase[country] && placeDetailsDatabase[country][city] && 
+          placeDetailsDatabase[country][city][type] && 
+          placeDetailsDatabase[country][city][type][placeName]) {
+        return placeDetailsDatabase[country][city][type][placeName];
+      }
+      
+      // بيانات افتراضية تفصيلية (بدون استدعاء API لتسريع العملية)
+      const descriptions = {
+        cultural: `${placeName} هو معلم ثقافي وتاريخي مهم في ${city}، ${country}. يقدم تجربة ثقافية غنية تتعرف من خلالها على تاريخ وتراث المنطقة.`,
+        nature: `${placeName} هو مكان طبيعي خلاب في ${city}، ${country}. يوفر إطلالات ساحرة وفرصة للاسترخاء والاستمتاع بجمال الطبيعة.`,
+        adventure: `${placeName} يوفر تجربة مغامرة مثيرة في ${city}، ${country}. مكان مثالي لمحبي الإثارة والأنشطة الرياضية.`,
+        food: `${placeName} هو مطعم راقي في ${city}، ${country}. يقدم أطباقاً لذيذة تمثل أفضل ما تقدمه المطابخ المحلية والعالمية.`
+      };
+      
+      const activitiesList = {
+        cultural: ['زيارة المكان', 'جولة استكشافية', 'التصوير', 'التعرف على التاريخ', 'مشاهدة المعروضات'],
+        nature: ['المشي', 'التنزه', 'التصوير', 'الاسترخاء', 'مشاهدة الطبيعة'],
+        adventure: ['ممارسة الأنشطة', 'المغامرة', 'التصوير', 'الاستمتاع بالإثارة'],
+        food: ['تناول الطعام', 'تجربة الأطباق المحلية', 'الاستمتاع بالأجواء', 'التصوير']
+      };
+      
+      const defaultDetails = {
+        description: descriptions[type] || `${placeName} هو مكان سياحي رائع في ${city}، ${country}. يوفر تجربة مميزة للزوار.`,
+        activities: activitiesList[type] || ['جولة استكشافية', 'التصوير', 'الاستمتاع بالمناظر'],
+        address: `${city}, ${country}`,
+        bestTime: type === 'food' ? '19:00-22:00' : '09:00-17:00',
+        duration: type === 'food' ? '2 ساعات' : '2-3 ساعات',
+        tips: type === 'food' ? 'احجز طاولة مسبقاً خاصة في عطلة نهاية الأسبوع' : 'احرص على الوصول مبكراً لتجنب الازدحام'
+      };
+      return defaultDetails;
+    }
+
+    function optimizeRoute(places, startPoint) {
+      if (places.length <= 2) return places;
+      const route = [startPoint];
+      const remaining = places.filter(p => p !== startPoint);
+      let current = startPoint;
+      while (remaining.length > 0) {
+        let nearest = remaining[0];
+        let minDist = Math.random() * 10;
+        for (const place of remaining) {
+          const dist = Math.random() * 10;
+          if (dist < minDist) {
+            minDist = dist;
+            nearest = place;
+          }
+        }
+        route.push(nearest);
+        remaining.splice(remaining.indexOf(nearest), 1);
+        current = nearest;
+      }
+      return route;
+    }
+
+    async function generateSmartPlan(country, days, interests, budget) {
+      // تنظيف اسم الدولة
+      country = country.trim();
+      console.log('الدولة المحددة:', country);
+      console.log('قائمة الدول العربية:', arabCountriesAsia);
+      
+      // التحقق من أن الدولة عربية في آسيا (مع مراعاة المسافات والهمزة)
+      const cleanCountry = country.replace(/\s+/g, '');
+      const isArabCountry = arabCountriesAsia.some(c => {
+        const cleanC = c.replace(/\s+/g, '');
+        return cleanC === cleanCountry || 
+               cleanC.replace('عُمان', 'عمان') === cleanCountry.replace('عُمان', 'عمان');
+      });
+      
+      console.log('هل الدولة عربية في آسيا؟', isArabCountry);
+      
+      if (!isArabCountry) {
+        console.error('الدولة غير صحيحة:', country, 'قائمة الدول:', arabCountriesAsia);
+        showMessage('يرجى اختيار دولة عربية في قارة آسيا فقط', 'error');
+        return [];
+      }
+      
+      const countryData = await getCountryData(country);
+      console.log('بيانات الدولة المسترجعة:', countryData);
+      
+      if (!countryData) {
+        console.error('لا توجد بيانات للدولة:', country);
+        showMessage('لا توجد بيانات متاحة لهذه الدولة. يرجى التأكد من أن الدولة عربية في آسيا.', 'error');
+        return [];
+      }
+      
+      // التحقق من وجود البيانات المطلوبة
+      if (!countryData.attractions || !countryData.attractions.budget) {
+        console.error('بيانات الدولة غير مكتملة:', countryData);
+        showMessage('بيانات الدولة غير مكتملة. يرجى المحاولة مرة أخرى.', 'error');
+        return [];
+      }
+      
+      const budgetLevel = budget.toLowerCase().includes('منخفض') || budget === 'low' ? 'low' : 
+                         budget.toLowerCase().includes('فاخر') || budget === 'high' ? 'high' : 'medium';
+      const dailyBudget = countryData.attractions.budget[budgetLevel] || countryData.attractions.budget.medium || 60;
+      
+      const interestsList = interests ? interests.split(',').map(i => i.trim().toLowerCase()).filter(i => i) : [];
+      const isCultural = interestsList.length === 0 || interestsList.some(i => ['ثقافة', 'تاريخ', 'متحف', 'cultural'].includes(i));
+      const isNature = interestsList.length === 0 || interestsList.some(i => ['طبيعة', 'جبال', 'بحر', 'nature'].includes(i));
+      const isAdventure = interestsList.some(i => ['مغامرة', 'رياضة', 'adventure'].includes(i));
+      const isFood = interestsList.length === 0 || interestsList.some(i => ['طعام', 'food'].includes(i));
+      
+      const plan = [];
+      
+      // التحقق من وجود المدن
+      if (!countryData.cities || countryData.cities.length === 0) {
+        console.error('لا توجد مدن للدولة:', countryData);
+        showMessage('لا توجد مدن متاحة لهذه الدولة.', 'error');
+        return [];
+      }
+      
+      console.log('عدد الأيام المطلوبة:', days);
+      console.log('المدن المتاحة:', countryData.cities);
+      console.log('الأماكن الثقافية:', countryData.attractions.cultural);
+      console.log('أماكن الطبيعة:', countryData.attractions.nature);
+      console.log('المطاعم:', countryData.attractions.food);
+      
+      for (let day = 1; day <= days; day++) {
+        const cityIndex = Math.min(day - 1, countryData.cities.length - 1);
+        const city = countryData.cities[cityIndex];
+        
+        console.log(`توليد اليوم ${day} للمدينة ${city}`);
+        
+        const dayPlan = {
+          day: day,
+          city: city,
+          morning: [],
+          afternoon: [],
+          evening: [],
+          totalCost: 0,
+          route: []
+        };
+        
+        // الصباح: إضافة نشاط ثقافي
+        console.log(`اليوم ${day} - isCultural:`, isCultural, 'cultural places:', countryData.attractions.cultural);
+        
+        if (countryData.attractions.cultural && countryData.attractions.cultural.length > 0) {
+          const culturalIndex = (day - 1) % countryData.attractions.cultural.length;
+          const placeName = countryData.attractions.cultural[culturalIndex];
+          const details = getPlaceDetails(placeName, city, country, 'cultural');
+          
+          dayPlan.morning.push({
+            name: placeName,
+            type: 'cultural',
+            duration: details.duration || '2-3 ساعات',
+            cost: dailyBudget * 0.25,
+            description: details.description,
+            activities: details.activities,
+            address: details.address,
+            bestTime: details.bestTime,
+            tips: details.tips
+          });
+          console.log(`تم إضافة نشاط صباحي: ${placeName}`);
+        }
+        
+        // بعد الظهر: إضافة نشاط طبيعة
+        console.log(`اليوم ${day} - isNature:`, isNature, 'nature places:', countryData.attractions.nature);
+        
+        if (countryData.attractions.nature && countryData.attractions.nature.length > 0) {
+          const natureIndex = (day - 1) % countryData.attractions.nature.length;
+          const placeName = countryData.attractions.nature[natureIndex];
+          const details = getPlaceDetails(placeName, city, country, 'nature');
+          
+          dayPlan.afternoon.push({
+            name: placeName,
+            type: 'nature',
+            duration: details.duration || '2-3 ساعات',
+            cost: dailyBudget * 0.25,
+            description: details.description,
+            activities: details.activities,
+            address: details.address,
+            bestTime: details.bestTime,
+            tips: details.tips
+          });
+          console.log(`تم إضافة نشاط بعد الظهر: ${placeName}`);
+        }
+        
+        // المساء: إضافة مطعم
+        console.log(`اليوم ${day} - food places:`, countryData.attractions.food);
+        
+        if (countryData.attractions.food && countryData.attractions.food.length > 0) {
+          const foodIndex = (day - 1) % countryData.attractions.food.length;
+          const restaurantName = countryData.attractions.food[foodIndex];
+          const details = getPlaceDetails(restaurantName, city, country, 'food');
+          
+          dayPlan.evening.push({
+            name: restaurantName,
+            type: 'food',
+            duration: details.duration || '2 ساعات',
+            cost: dailyBudget * 0.45,
+            description: details.description || `مطعم راقي في ${city}`,
+            activities: details.activities || ['تناول العشاء', 'تجربة الأطباق المحلية'],
+            address: details.address,
+            bestTime: details.bestTime,
+            tips: details.tips
+          });
+          console.log(`تم إضافة مطعم: ${restaurantName}`);
+        } else {
+          // إذا لم يكن هناك مطاعم، أضف مطعم افتراضي
+          dayPlan.evening.push({
+            name: `مطعم في ${city}`,
+            type: 'food',
+            duration: '2 ساعات',
+            cost: dailyBudget * 0.45,
+            description: `مطعم راقي في ${city} يقدم أطباقاً محلية وعالمية`,
+            activities: ['تناول العشاء', 'تجربة الأطباق المحلية', 'الاستمتاع بالأجواء'],
+            address: `${city}, ${country}`,
+            bestTime: '19:00-21:00',
+            tips: 'احجز طاولة مسبقاً خاصة في عطلة نهاية الأسبوع'
+          });
+          console.log(`تم إضافة مطعم افتراضي للمدينة ${city}`);
+        }
+        
+        console.log(`اليوم ${day} - الأنشطة:`, {
+          morning: dayPlan.morning.length,
+          afternoon: dayPlan.afternoon.length,
+          evening: dayPlan.evening.length
+        });
+        
+        const allPlaces = [
+          ...dayPlan.morning.map(a => a.name),
+          ...dayPlan.afternoon.map(a => a.name),
+          ...dayPlan.evening.map(a => a.name)
+        ];
+        dayPlan.route = optimizeRoute(allPlaces, allPlaces[0] || '');
+        dayPlan.totalCost = dayPlan.morning.reduce((s, a) => s + a.cost, 0) +
+                          dayPlan.afternoon.reduce((s, a) => s + a.cost, 0) +
+                          dayPlan.evening.reduce((s, a) => s + a.cost, 0);
+        
+        plan.push(dayPlan);
+      }
+      
+      console.log('الخطة النهائية:', plan);
+      console.log('عدد الأيام في الخطة:', plan.length);
+      
+      return plan;
+    }
+
+    async function displayPlan(plan, country, days, interests, budget) {
+      const countryData = await getCountryData(country);
+      
+      const totalCost = plan.reduce((sum, day) => sum + day.totalCost, 0);
+      
+      const tripInfo = document.getElementById('tripInfo');
+      tripInfo.innerHTML = `
+        <div class="plan-info-item">
+          <div class="plan-info-label">الوجهة</div>
+          <div class="plan-info-value">${country}</div>
+          </div>
+        <div class="plan-info-item">
+          <div class="plan-info-label">المدة</div>
+          <div class="plan-info-value">${days} ${days === 1 ? 'يوم' : 'أيام'}</div>
+          </div>
+        <div class="plan-info-item">
+          <div class="plan-info-label">الميزانية</div>
+          <div class="plan-info-value">${budget}</div>
+          </div>
+        <div class="plan-info-item">
+          <div class="plan-info-label">التكلفة الإجمالية</div>
+          <div class="plan-info-value" style="color: var(--neon-cyan);">$${Math.round(totalCost)}</div>
+        </div>
+      `;
+      
+      const dailyPlans = document.getElementById('dailyPlans');
+      dailyPlans.innerHTML = plan.map(day => `
+        <div class="day-section">
+          <div class="day-title">اليوم ${day.day} - ${day.city} ($${Math.round(day.totalCost)})</div>
+          
+          ${day.morning.length > 0 ? `
+            <div class="time-slot">
+              <div class="time-slot-title">الصباح</div>
+              <div class="time-slot-activities">
+                ${day.morning.map(activity => `
+                  <div class="activity-item">
+                    <div class="activity-name">${activity.name}</div>
+                    <div class="activity-details">
+                      <div style="margin-bottom: 4px;">${activity.description || ''}</div>
+                      <div style="font-size: 0.7rem; color: var(--text-secondary); margin-bottom: 4px;">
+                        ${activity.activities ? activity.activities.join(' • ') : ''}
+                      </div>
+                      <div style="font-size: 0.7rem;">
+                        ${activity.duration} • $${Math.round(activity.cost)} • ${activity.bestTime}
+                        ${activity.address ? ' • ' + activity.address : ''}
+                      </div>
+                      ${activity.tips ? `<div style="font-size: 0.7rem; color: var(--neon-cyan); margin-top: 4px;">💡 ${activity.tips}</div>` : ''}
+                    </div>
+                        </div>
+                            `).join('')}
+                        </div>
+            </div>
+          ` : ''}
+          
+          ${day.afternoon.length > 0 ? `
+            <div class="time-slot">
+              <div class="time-slot-title">بعد الظهر</div>
+              <div class="time-slot-activities">
+                ${day.afternoon.map(activity => `
+                  <div class="activity-item">
+                    <div class="activity-name">${activity.name}</div>
+                    <div class="activity-details">
+                      <div style="margin-bottom: 4px;">${activity.description || ''}</div>
+                      <div style="font-size: 0.7rem; color: var(--text-secondary); margin-bottom: 4px;">
+                        ${activity.activities ? activity.activities.join(' • ') : ''}
+                      </div>
+                      <div style="font-size: 0.7rem;">
+                        ${activity.duration} • $${Math.round(activity.cost)} • ${activity.bestTime}
+                        ${activity.address ? ' • ' + activity.address : ''}
+                      </div>
+                      ${activity.tips ? `<div style="font-size: 0.7rem; color: var(--neon-cyan); margin-top: 4px;">💡 ${activity.tips}</div>` : ''}
+                    </div>
+                        </div>
+                            `).join('')}
+                        </div>
+            </div>
+          ` : ''}
+          
+          ${day.evening.length > 0 ? `
+            <div class="time-slot">
+              <div class="time-slot-title">المساء</div>
+              <div class="time-slot-activities">
+                ${day.evening.map(activity => `
+                  <div class="activity-item">
+                    <div class="activity-name">${activity.name}</div>
+                    <div class="activity-details">
+                      <div style="margin-bottom: 4px;">${activity.description || ''}</div>
+                      <div style="font-size: 0.7rem; color: var(--text-secondary); margin-bottom: 4px;">
+                        ${activity.activities ? activity.activities.join(' • ') : ''}
+                      </div>
+                      <div style="font-size: 0.7rem;">
+                        ${activity.duration} • $${Math.round(activity.cost)} • ${activity.bestTime}
+                        ${activity.address ? ' • ' + activity.address : ''}
+                      </div>
+                      ${activity.tips ? `<div style="font-size: 0.7rem; color: var(--neon-cyan); margin-top: 4px;">💡 ${activity.tips}</div>` : ''}
+                    </div>
+                        </div>
+                            `).join('')}
+                          </div>
+                        </div>
+                      ` : ''}
+        </div>
+      `).join('');
+      
+      document.getElementById('planActions').style.display = 'flex';
+      
+      const avgDailyCost = totalCost / days;
+      
+      window.currentPlanData = {
+        country: country,
+        days: days,
+        budget: budget,
+        interests: interests,
+        plan: plan,
+        totalCost: totalCost,
+        avgDailyCost: avgDailyCost
+      };
+    }
+
+    // تهيئة الصفحة
+    (async function initPage() {
+      // قراءة البيانات من URL
+      const params = new URLSearchParams(window.location.search);
+      let country = params.get('country') || '';
+      const days = parseInt(params.get('days'), 10) || 5;
+      const interests = params.get('interests') || 'ثقافة، طبيعة';
+      const budget = params.get('budget') || 'متوسطة';
+      
+      console.log('البيانات من URL:', { country, days, interests, budget });
+      console.log('URL الكامل:', window.location.href);
+      
+      // تنظيف اسم الدولة من المسافات الزائدة
+      if (country) {
+        country = decodeURIComponent(country).trim();
+        console.log('الدولة بعد التنظيف:', country);
+      }
+      
+      // التحقق من أن الدولة محددة
+      if (!country) {
+        console.error('الدولة غير محددة');
+        showMessage('يرجى تحديد دولة من الفورم', 'error');
+        return;
+      }
+
+      // توليد الخطة فوراً
+      try {
+        console.log('بدء توليد الخطة:', { country, days, interests, budget });
+        const plan = await generateSmartPlan(country, days, interests, budget);
+        console.log('الخطة المولدة:', plan);
+        console.log('طول الخطة:', plan ? plan.length : 0);
+        
+        if (plan && plan.length > 0) {
+          console.log('عرض الخطة...');
+          await displayPlan(plan, country, days, interests, budget);
+        } else {
+          console.error('فشل في توليد الخطة. الخطة:', plan);
+          showMessage('فشل في توليد الخطة. يرجى التأكد من أن الدولة عربية في آسيا.', 'error');
+        }
+      } catch (error) {
+        console.error('خطأ في توليد الخطة:', error);
+        console.error('تفاصيل الخطأ:', error.stack);
+        showMessage('حدث خطأ أثناء توليد الخطة: ' + (error.message || error), 'error');
+      }
+    })();
+
+    document.getElementById('savePlanBtn').addEventListener('click', async function() {
+      if (!window.currentPlanData) {
+        showMessage('لا توجد خطة لحفظها', 'error');
+        return;
+      }
+
+      const result = planManager.savePlan(window.currentPlanData);
+      
+      if (result.success) {
+        showMessage(result.message, 'success');
+        this.textContent = 'تم الحفظ';
+        this.disabled = true;
+        setTimeout(() => {
+          this.textContent = 'حفظ الخطة';
+          this.disabled = false;
+        }, 3000);
+      } else {
+        showMessage(result.message, 'error');
+      }
+    });
+
+    document.getElementById('sharePlanBtn').addEventListener('click', async function() {
+      if (!window.currentPlanData) {
+        showMessage('لا توجد خطة للمشاركة', 'error');
+        return;
+      }
+
+      const result = planManager.sharePlan(Date.now().toString());
+      
+      if (result.success) {
+        const copyResult = await planManager.copyToClipboard(result.link);
+        showMessage(copyResult.message, 'success');
+      } else {
+        showMessage(result.message, 'error');
+      }
+    });
+
+    function showMessage(message, type) {
+      const messageDiv = document.getElementById('planMessage');
+      const colors = {
+        success: 'var(--neon-cyan)',
+        error: '#FF6B6B',
+        info: 'var(--neon-cyan)'
+      };
+      
+      messageDiv.innerHTML = `<div style="color: ${colors[type] || colors.info}; font-weight: 600;">${message}</div>`;
+      
+      setTimeout(() => {
+          messageDiv.innerHTML = '';
+      }, 5000);
+    }
+  </script>
+</body>
+</html>
